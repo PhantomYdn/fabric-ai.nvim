@@ -215,6 +215,23 @@ function M.run_pattern(pattern, input, callbacks)
   M.execute_streaming({ "-s", "-p", pattern }, input, callbacks)
 end
 
+---Run a pattern on a URL with streaming output
+---Uses -y flag for YouTube URLs or -u flag for generic URLs
+---@param url string The URL to process
+---@param url_type "youtube" | "generic" The type of URL
+---@param pattern string Pattern name to run
+---@param callbacks FabricAI.StreamCallbacks Callbacks for streaming events
+function M.run_url(url, url_type, pattern, callbacks)
+  -- Build command args based on URL type
+  -- -y for YouTube (transcript extraction)
+  -- -u for generic URLs (web page content)
+  local url_flag = url_type == "youtube" and "-y" or "-u"
+
+  -- Note: -s flag enables streaming output from Fabric CLI
+  -- Order: url_flag, url, -s, -p, pattern
+  M.execute_streaming({ url_flag, url, "-s", "-p", pattern }, nil, callbacks)
+end
+
 ---Cancel any running Fabric command
 function M.cancel()
   if M._current_job then

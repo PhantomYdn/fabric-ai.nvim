@@ -258,40 +258,49 @@ Use this for tracking progress during development.
 
 ### Step 5.1: URL Detection
 **File:** `lua/fabric-ai/url.lua`
-- [ ] Create function to get URL under cursor
-- [ ] Implement URL pattern matching
-- [ ] Handle URLs with/without protocol
-- [ ] Return nil if no URL found
+- [x] Create function to get URL under cursor
+- [x] Implement URL pattern matching
+- [x] Handle URLs with/without protocol
+- [x] Return nil if no URL found
 
 ### Step 5.2: YouTube Detection
 **File:** `lua/fabric-ai/url.lua` (continued)
-- [ ] Create function to detect YouTube URLs
-- [ ] Match `youtube.com/watch?v=`
-- [ ] Match `youtu.be/`
-- [ ] Match YouTube playlist URLs
-- [ ] Return boolean for is_youtube
+- [x] Create function to detect YouTube URLs
+- [x] Match `youtube.com/watch?v=`
+- [x] Match `youtu.be/`
+- [x] Match YouTube playlist URLs
+- [x] Return boolean for is_youtube
 
 ### Step 5.3: URL Command
 **File:** `lua/fabric-ai/commands.lua` (extend)
-- [ ] Implement `:Fabric url` command
-- [ ] Detect URL under cursor
-- [ ] Determine URL type (YouTube vs other)
-- [ ] Build Fabric command with `-y` or `-u` flag
-- [ ] Open pattern picker
-- [ ] Execute and stream to window
+- [x] Implement `:Fabric url` command
+- [x] Detect URL under cursor
+- [x] Determine URL type (YouTube vs other)
+- [x] Build Fabric command with `-y` or `-u` flag
+- [x] Open pattern picker
+- [x] Execute and stream to window
 
 ### Step 5.4: URL Error Handling
 **File:** `lua/fabric-ai/url.lua` (continued)
-- [ ] Handle no URL under cursor
-- [ ] Handle invalid URLs
-- [ ] Show appropriate error messages
+- [x] Handle no URL under cursor
+- [x] Handle invalid URLs
+- [x] Show appropriate error messages
 
 **Milestone 5 Checkpoint:**
-- [ ] URL under cursor detected
-- [ ] YouTube URLs use `-y` flag
-- [ ] Other URLs use `-u` flag
-- [ ] Pattern picker works with URLs
-- [ ] Errors handled gracefully
+- [x] URL under cursor detected
+- [x] YouTube URLs use `-y` flag
+- [x] Other URLs use `-u` flag
+- [x] Pattern picker works with URLs
+- [x] Errors handled gracefully
+
+### Milestone 5 Decisions
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| URL detection scope | Cursor position only | Simpler UX, visual selection uses `:Fabric run` |
+| Multi-line URLs | Not supported | Edge case, MVP simplicity |
+| URL validation | Basic only | Let Fabric CLI handle actual URL errors |
+| Window title | Pattern name only | Keep simple, consistent with text processing |
+| Replace action | Replace URL text | Consistent UX, all actions work for both modes |
 
 ---
 
@@ -400,7 +409,7 @@ Use this for tracking progress during development.
 - [x] `lua/fabric-ai/processor.lua`
 - [x] `lua/fabric-ai/window.lua`
 - [x] `lua/fabric-ai/selection.lua`
-- [ ] `lua/fabric-ai/url.lua`
+- [x] `lua/fabric-ai/url.lua`
 - [x] `lua/fabric-ai/patterns.lua`
 - [ ] `lua/fabric-ai/actions.lua` (actions implemented in commands.lua for MVP)
 - [x] `lua/fabric-ai/health.lua`

@@ -251,6 +251,216 @@ Fabric Version: [fabric-ai --version]
 
 ---
 
+## Milestone 5: URL Processing
+
+### Test 12: URL Detection Under Cursor
+
+**Steps:**
+1. Create a buffer with the following content:
+   ```
+   Check out https://example.com for more info.
+   ```
+2. Position cursor anywhere on the URL (e.g., on "example")
+3. Run `:Fabric url`
+
+**Expected:**
+- Pattern picker opens
+- After selecting a pattern, processing begins
+- Output streams to floating window
+
+**Pass Criteria:** URL correctly detected and processed
+
+---
+
+### Test 13: YouTube URL Detection (youtube.com)
+
+**Steps:**
+1. Create a buffer with:
+   ```
+   Watch this: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+   ```
+2. Position cursor on the URL
+3. Run `:Fabric url`
+4. Select a pattern (e.g., `extract_wisdom`)
+
+**Expected:**
+- YouTube URL detected
+- Fabric uses `-y` flag (transcript extraction)
+- Processing completes (may take longer due to transcript fetch)
+
+**Verification:**
+- If you have access to Fabric logs or verbose mode, verify `-y` flag was used
+
+**Pass Criteria:** YouTube URL processed with transcript extraction
+
+---
+
+### Test 14: YouTube URL Detection (youtu.be)
+
+**Steps:**
+1. Create a buffer with:
+   ```
+   Short link: https://youtu.be/dQw4w9WgXcQ
+   ```
+2. Position cursor on the URL
+3. Run `:Fabric url`
+
+**Expected:**
+- youtu.be URL recognized as YouTube
+- Same behavior as Test 13
+
+**Pass Criteria:** Short YouTube URLs handled correctly
+
+---
+
+### Test 15: Generic URL Processing
+
+**Steps:**
+1. Create a buffer with:
+   ```
+   Read more at https://github.com/danielmiessler/fabric
+   ```
+2. Position cursor on the URL
+3. Run `:Fabric url`
+
+**Expected:**
+- URL detected as generic (not YouTube)
+- Fabric uses `-u` flag (web page content)
+- Page content processed through selected pattern
+
+**Pass Criteria:** Generic URLs use `-u` flag
+
+---
+
+### Test 16: No URL Under Cursor
+
+**Steps:**
+1. Create a buffer with:
+   ```
+   This is just plain text without any URLs.
+   ```
+2. Position cursor on any word
+3. Run `:Fabric url`
+
+**Expected:**
+- Warning: "No URL found under cursor" (yellow, not red)
+- Hint: "Place cursor on a URL, then run :Fabric url"
+- No Lua error
+
+**Pass Criteria:** Graceful error handling
+
+---
+
+### Test 17: URL in Parentheses
+
+**Steps:**
+1. Create a buffer with:
+   ```
+   See the docs (https://example.com/docs) for details.
+   ```
+2. Position cursor on the URL (inside the parentheses)
+3. Run `:Fabric url`
+
+**Expected:**
+- URL extracted without parentheses
+- Processing works normally
+
+**Pass Criteria:** URL extracted from wrapped context
+
+---
+
+### Test 18: URL Replace Action
+
+**Steps:**
+1. Create a buffer with:
+   ```
+   Link: https://example.com/article
+   More text here.
+   ```
+2. Position cursor on the URL
+3. Run `:Fabric url`
+4. Select a pattern
+5. Wait for processing
+6. Press `r`
+
+**Expected:**
+- The URL text is replaced with Fabric output
+- "More text here." line remains unchanged
+- Undo with `u` restores the original URL
+
+**Pass Criteria:** Replace action works for URL processing
+
+---
+
+### Test 19: URL Yank Action
+
+**Steps:**
+1. Position cursor on any URL
+2. Run `:Fabric url`
+3. Select pattern, wait for completion
+4. Press `y`
+
+**Expected:**
+- "Output copied to clipboard" message
+- Window closes
+- Paste with `"+p` shows Fabric output
+
+**Pass Criteria:** Yank action works for URL processing
+
+---
+
+### Test 20: URL New Buffer Action
+
+**Steps:**
+1. Position cursor on any URL
+2. Run `:Fabric url`
+3. Select pattern, wait for completion
+4. Press `n`
+
+**Expected:**
+- Floating window closes
+- New buffer opens with output
+- Original buffer unchanged
+
+**Pass Criteria:** New buffer action works for URL processing
+
+---
+
+### Test 21: Cancel URL Processing
+
+**Steps:**
+1. Position cursor on a YouTube URL (these take longer)
+2. Run `:Fabric url`
+3. Select a pattern
+4. Immediately press `q` (or `<Esc>` or `<C-c>`)
+
+**Expected:**
+- "[Cancelled]" message appears briefly
+- Window closes
+- Processing stops
+
+**Pass Criteria:** Cancel works during URL processing
+
+---
+
+### Test 22: URL with www. Prefix (No Protocol)
+
+**Steps:**
+1. Create a buffer with:
+   ```
+   Visit www.example.com for more.
+   ```
+2. Position cursor on `www.example.com`
+3. Run `:Fabric url`
+
+**Expected:**
+- URL detected and `https://` prepended automatically
+- Processing works normally
+
+**Pass Criteria:** www. URLs handled without explicit protocol
+
+---
+
 ## Adding New Tests
 
 When implementing new features:

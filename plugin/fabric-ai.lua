@@ -18,6 +18,11 @@ local subcommands = {
     require("fabric-ai.commands").run(opts)
   end,
 
+  -- Process URL under cursor
+  url = function(opts)
+    require("fabric-ai.commands").url(opts)
+  end,
+
   -- Health check subcommand (works even when lazy-loaded)
   health = function(_)
     require("fabric-ai.commands").health()

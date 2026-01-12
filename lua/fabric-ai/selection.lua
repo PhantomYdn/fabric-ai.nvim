@@ -141,6 +141,12 @@ function M.has_range()
   return M._last_range ~= nil
 end
 
+---Store a selection range manually (used for URL replacement)
+---@param range FabricAI.SelectionRange The range to store
+function M.store_range(range)
+  M._last_range = range
+end
+
 ---Get the buffer number from the last selection
 ---@return number?
 function M.get_source_bufnr()

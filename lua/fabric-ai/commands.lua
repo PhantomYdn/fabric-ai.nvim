@@ -8,6 +8,7 @@ local selection = require "fabric-ai.selection"
 local window = require "fabric-ai.window"
 local processor = require "fabric-ai.processor"
 local picker = require "fabric-ai.picker"
+local url_module = require "fabric-ai.url"
 
 ---Set up keybindings during processing (cancel/quit only)
 ---@param buf_id number Buffer ID
@@ -234,6 +235,78 @@ function M._action_new_buffer()
   vim.api.nvim_set_current_buf(new_buf)
 
   vim.notify("fabric-ai: Output opened in new buffer", vim.log.levels.INFO)
+end
+
+---Run the URL processing workflow: detect URL -> pick pattern -> execute -> display
+---This is the handler for `:Fabric url`
+---@param opts table Command options from nvim_create_user_command
+function M.url(opts)
+  -- Step 1: Get URL under cursor
+  local url_result, err = url_module.get_url_under_cursor()
+
+  if not url_result then
+    vim.notify("fabric-ai: " .. (err or "No URL found"), vim.log.levels.WARN)
+    vim.notify("fabric-ai: Place cursor on a URL, then run :Fabric url", vim.log.levels.INFO)
+    return
+  end
+
+  local url = url_result.url
+  local url_type = url_module.get_url_type(url)
+
+  -- Step 2: Store the URL position as a selection range for replacement
+  selection.store_range {
+    start_row = url_result.row,
+    start_col = url_result.start_col,
+    end_row = url_result.row, -- URLs are single-line
+    end_col = url_result.end_col,
+    mode = "v", -- Character-wise replacement
+    bufnr = url_result.bufnr,
+  }
+
+  -- Step 3: Open pattern picker
+  picker.pick_pattern(function(pattern)
+    if not pattern then
+      -- User cancelled picker
+      selection.clear_range()
+      return
+    end
+
+    -- Step 4: Open floating window
+    local win_result, win_err = window.open { pattern_name = pattern }
+    if not win_result then
+      vim.notify("fabric-ai: " .. (win_err or "Failed to open window"), vim.log.levels.ERROR)
+      selection.clear_range()
+      return
+    end
+
+    -- Step 4.5: Set up cancel keymaps during processing
+    setup_processing_keymaps(win_result.buf_id)
+
+    -- Step 5: Execute with streaming
+    processor.run_url(url, url_type, pattern, {
+      on_stdout = function(data)
+        -- Stream output to window as it arrives
+        window.append_text(data)
+      end,
+
+      on_stderr = function(data)
+        -- Show stderr in the window as well (errors from Fabric)
+        window.append_text(data)
+      end,
+
+      on_complete = function(code)
+        window.processing_complete()
+
+        if code ~= 0 then
+          -- Append error indicator (the actual error should already be displayed via stderr)
+          window.append_text("\n\n[Process exited with code " .. code .. "]")
+        end
+
+        -- Set up action keybindings now that processing is complete
+        M._setup_window_keymaps()
+      end,
+    })
+  end)
 end
 
 ---Run health check (wrapper for checkhealth)
