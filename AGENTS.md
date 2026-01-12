@@ -18,6 +18,7 @@ This document provides guidelines for AI coding agents (Claude, Cursor, Copilot,
 10. **Preserve milestone checkpoints** - Only mark individual step items complete in PLAN_v1.md, NOT milestone checkpoint items - those are for user manual testing
 11. **Offer commits at milestones** - After completing a milestone implementation, ask user if they want to commit before proceeding
 12. **Document key decisions** - When making implementation choices (caching strategy, error handling, etc.), add them to the "Milestone X Decisions" table in PLAN_v1.md
+13. **Document testing as you go** - When implementing features, add corresponding test cases to `TESTING.md`. Write tests BEFORE or DURING implementation, not after.
 
 ---
 
@@ -40,6 +41,7 @@ This document provides guidelines for AI coding agents (Claude, Cursor, Copilot,
 | `PLAN_v1.md` | Step-by-step implementation checklist |
 | `IDEA.md` | Original idea and problem statement |
 | `README.md` | User-facing documentation |
+| `TESTING.md` | Manual testing procedures and test cases |
 
 ---
 
@@ -192,7 +194,21 @@ Use module names: `config`, `picker`, `processor`, `window`, `url`, `patterns`, 
 ## Common Patterns
 
 ### Error Handling
+
+**Log Level Guidelines:**
+- `vim.log.levels.ERROR` - System errors (failed to create window, CLI crash)
+- `vim.log.levels.WARN` - User errors (no selection, invalid input)
+- `vim.log.levels.INFO` - Success messages, hints
+
 ```lua
+-- User error (recoverable, user's fault)
+if not input_text then
+  vim.notify("fabric-ai: No text selected", vim.log.levels.WARN)
+  vim.notify("fabric-ai: Select text in visual mode, then run :Fabric", vim.log.levels.INFO)
+  return
+end
+
+-- System error (unexpected failure)
 local ok, result = pcall(function()
   -- risky operation
 end)
@@ -200,6 +216,11 @@ end)
 if not ok then
   vim.notify("fabric-ai: " .. result, vim.log.levels.ERROR)
   return
+end
+
+-- Always check buffer/window validity before operations
+if not buf_id or not vim.api.nvim_buf_is_valid(buf_id) then
+  return  -- Silently return, resource no longer exists
 end
 ```
 
@@ -325,3 +346,4 @@ If unclear about implementation:
 |---------|------|---------|
 | 1.0 | 2026-01-12 | Initial guidelines |
 | 1.1 | 2026-01-12 | Added rules 10-12 (checkpoints, commits, decisions); Added Fabric CLI Reference |
+| 1.2 | 2026-01-12 | Added rule 13 (document testing); Added TESTING.md to Key Documents |
