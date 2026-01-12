@@ -4,6 +4,20 @@ This document provides guidelines for AI coding agents (Claude, Cursor, Copilot,
 
 ---
 
+## AI Workflow Rules
+
+1. **Ask before assuming** - Gather requirements in chunks of 1-5 questions; reach 9/10 confidence before implementing
+2. **Read docs first** - Always read `PRD_v1.md`, `PLAN_v1.md`, and relevant external docs (Fabric, Neovim API) before making changes
+3. **Keep PLAN_v1.md current** - Mark tasks complete/in-progress as you work; this is the source of truth for progress
+4. **Keep all docs up-to-date** - When technical details change, immediately update affected documentation
+5. **Commit after completing** - Always commit changes when a logical unit of work is done
+6. **Present options clearly** - Use A/B/C format for tradeoffs; let user decide
+7. **Start simple** - Choose easier/OOB solutions for MVP; enhance later
+8. **Prefer built-ins** - Use Neovim native features over external dependencies when possible
+9. **Track progress visibly** - Use todo lists for multi-step work; update `PLAN_v1.md`; keep user informed
+
+---
+
 ## Project Overview
 
 **fabric-ai.nvim** is a Neovim plugin that integrates Fabric AI's 220+ text processing patterns directly into the editor.
@@ -23,8 +37,6 @@ This document provides guidelines for AI coding agents (Claude, Cursor, Copilot,
 | `PLAN_v1.md` | Step-by-step implementation checklist |
 | `IDEA.md` | Original idea and problem statement |
 | `README.md` | User-facing documentation |
-
-**Always read `PRD_v1.md` and `PLAN_v1.md` before making changes.**
 
 ---
 
