@@ -18,8 +18,6 @@ jobs:
           LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
         with:
           name: fabric-ai.nvim
-          dependencies: |
-            telescope.nvim >= 0.1.0, optional
           summary: "Neovim plugin for Fabric AI's 220+ text processing patterns"
           detailed_description: |
             A Neovim plugin that integrates Fabric AI's 220+ text processing patterns
