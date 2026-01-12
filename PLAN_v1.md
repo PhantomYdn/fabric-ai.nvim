@@ -13,16 +13,16 @@ Use this for tracking progress during development.
 ## Pre-Implementation Setup
 
 ### Step 0.1: Project Initialization
-- [ ] Initialize git repository
-- [ ] Create basic directory structure
-- [ ] Add LICENSE (MIT)
-- [ ] Add .gitignore
-- [ ] Add .stylua.toml
+- [x] Initialize git repository
+- [x] Create basic directory structure
+- [x] Add LICENSE (MIT)
+- [x] Add .gitignore
+- [x] Add .stylua.toml
 
 ### Step 0.2: Development Environment
-- [ ] Set up Neovim with plugin loading from local path
-- [ ] Install StyLua for formatting
-- [ ] Configure LSP for Lua (lua_ls)
+- [x] Set up Neovim with plugin loading from local path
+- [x] Install StyLua for formatting
+- [x] Configure LSP for Lua (lua_ls)
 
 ---
 

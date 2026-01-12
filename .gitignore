@@ -1,0 +1,23 @@
+# Neovim
+*.swp
+*.swo
+*~
+
+# Lua
+*.luac
+.luarc.json
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Testing
+.testcache/
+luacov.report.out
+luacov.stats.out
+
+# Local development
+.nvim.lua
