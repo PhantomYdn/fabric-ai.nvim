@@ -23,6 +23,12 @@ A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fa
 
 ## Installation
 
+### rocks.nvim
+
+```vim
+:Rocks install fabric-ai.nvim
+```
+
 ### lazy.nvim
 
 ```lua

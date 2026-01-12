@@ -1,0 +1,34 @@
+name: LuaRocks release
+on:
+  push:
+    tags:
+      - "*"
+  pull_request:
+
+jobs:
+  luarocks-release:
+    runs-on: ubuntu-latest
+    name: LuaRocks upload
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: LuaRocks Upload
+        uses: nvim-neorocks/luarocks-tag-release@v7
+        env:
+          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
+        with:
+          name: fabric-ai.nvim
+          dependencies: |
+            telescope.nvim >= 0.1.0, optional
+          summary: "Neovim plugin for Fabric AI's 220+ text processing patterns"
+          detailed_description: |
+            A Neovim plugin that integrates Fabric AI's 220+ text processing patterns
+            directly into your editor. Features include visual selection processing,
+            URL processing (YouTube/web), streaming output, Telescope integration
+            with pattern preview, and flexible output actions.
+          labels: |
+            neovim
+            neovim-plugin
+            ai
+            fabric
+            text-processing
