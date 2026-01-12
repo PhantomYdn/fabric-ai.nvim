@@ -30,21 +30,21 @@ Use this for tracking progress during development.
 
 ### Step 1.1: Plugin Entry Point
 **File:** `plugin/fabric-ai.lua`
-- [ ] Create plugin guard (prevent double-loading)
-- [ ] Define `:Fabric` command with subcommand parsing
-- [ ] Set up lazy-loading triggers
+- [x] Create plugin guard (prevent double-loading)
+- [x] Define `:Fabric` command with subcommand parsing
+- [x] Set up lazy-loading triggers
 
 **File:** `lua/fabric-ai/init.lua`
-- [ ] Create `setup()` function
-- [ ] Export public API
-- [ ] Initialize modules on first use
+- [x] Create `setup()` function
+- [x] Export public API
+- [x] Initialize modules on first use
 
 ### Step 1.2: Configuration System
 **File:** `lua/fabric-ai/config.lua`
-- [ ] Define default configuration table
-- [ ] Create `setup(opts)` to merge user config
-- [ ] Add validation for critical options
-- [ ] Implement `get()` function for accessing config
+- [x] Define default configuration table
+- [x] Create `setup(opts)` to merge user config
+- [x] Add validation for critical options
+- [x] Implement `get()` function for accessing config
 
 **Default Config:**
 ```lua
@@ -63,23 +63,23 @@ Use this for tracking progress during development.
 
 ### Step 1.3: Fabric CLI Integration
 **File:** `lua/fabric-ai/processor.lua`
-- [ ] Create function to check if Fabric CLI exists
-- [ ] Create function to get Fabric version
-- [ ] Create function to execute Fabric commands (basic, non-streaming)
-- [ ] Handle command not found errors
+- [x] Create function to check if Fabric CLI exists
+- [x] Create function to get Fabric version
+- [x] Create function to execute Fabric commands (basic, non-streaming)
+- [x] Handle command not found errors
 
 ### Step 1.4: Health Check
 **File:** `lua/fabric-ai/health.lua`
-- [ ] Implement `:checkhealth fabric-ai`
-- [ ] Check Neovim version (0.10+)
-- [ ] Check Fabric CLI availability
-- [ ] Check Fabric CLI version
-- [ ] Check patterns directory exists
+- [x] Implement `:checkhealth fabric-ai`
+- [x] Check Neovim version (0.10+)
+- [x] Check Fabric CLI availability
+- [x] Check Fabric CLI version
+- [x] Check patterns directory exists
 
 **Milestone 1 Checkpoint:**
-- [ ] `:Fabric` command registered
-- [ ] `:checkhealth fabric-ai` works
-- [ ] Config can be customized
+- [x] `:Fabric` command registered
+- [x] `:checkhealth fabric-ai` works
+- [x] Config can be customized
 
 ---
 
@@ -87,38 +87,46 @@ Use this for tracking progress during development.
 
 ### Step 2.1: Pattern Discovery
 **File:** `lua/fabric-ai/patterns.lua`
-- [ ] Create function to run `fabric-ai -l`
-- [ ] Parse pattern list output
-- [ ] Create function to get pattern directory path
-- [ ] Create function to read pattern's `system.md`
-- [ ] Support both default and custom pattern paths
+- [x] Create function to run `fabric-ai -l`
+- [x] Parse pattern list output
+- [x] Create function to get pattern directory path
+- [x] Create function to read pattern's `system.md`
+- [x] Support both default and custom pattern paths
 
 ### Step 2.2: Telescope Picker
 **File:** `lua/fabric-ai/picker.lua`
-- [ ] Check if Telescope is available
-- [ ] Create Telescope picker for patterns
-- [ ] Implement preview showing `system.md` content
-- [ ] Handle pattern selection callback
-- [ ] Add fuzzy search support
+- [x] Check if Telescope is available
+- [x] Create Telescope picker for patterns
+- [x] Implement preview showing `system.md` content
+- [x] Handle pattern selection callback
+- [x] Add fuzzy search support
 
 ### Step 2.3: Fallback Picker
 **File:** `lua/fabric-ai/picker.lua` (continued)
-- [ ] Implement vim.ui.select fallback
-- [ ] Format pattern names for display
-- [ ] Handle selection callback
-- [ ] Maintain consistent API with Telescope path
+- [x] Implement vim.ui.select fallback
+- [x] Format pattern names for display
+- [x] Handle selection callback
+- [x] Maintain consistent API with Telescope path
 
 ### Step 2.4: Picker Integration
 **File:** `lua/fabric-ai/picker.lua` (continued)
-- [ ] Create unified `pick_pattern(callback)` function
-- [ ] Auto-detect Telescope availability
-- [ ] Route to appropriate picker implementation
+- [x] Create unified `pick_pattern(callback)` function
+- [x] Auto-detect Telescope availability
+- [x] Route to appropriate picker implementation
 
 **Milestone 2 Checkpoint:**
 - [ ] Pattern list retrieved successfully
 - [ ] Telescope picker shows patterns with preview
 - [ ] vim.ui.select works when Telescope unavailable
 - [ ] Custom patterns directory supported
+
+### Milestone 2 Decisions
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Pattern caching | No caching for MVP | Simpler, always fresh; add caching later if performance issues |
+| Telescope preview format | Markdown filetype | Syntax highlighting improves readability |
+| Pattern discovery method | CLI (`fabric-ai -l`) | Respects Fabric's config, includes custom patterns |
+| Empty patterns handling | Notify error and abort | Cleaner UX than showing empty picker |
 
 ---
 
@@ -291,6 +299,14 @@ Use this for tracking progress during development.
 - [ ] Include recommended keybindings
 - [ ] Show customization examples
 
+### Step 6.6: Documentation Notes (from Milestone 1)
+**Topics to cover in README/Vimdoc:**
+- [ ] Lazy-loading and `:Fabric health` workaround (`:checkhealth fabric-ai` requires plugin to be loaded first)
+- [ ] Alternative lazy.nvim configs: `event = "VeryLazy"` vs `cmd = { "Fabric" }`
+- [ ] Config validation behavior (warns on invalid values, uses defaults)
+- [ ] Fabric CLI warning on setup (immediate warning if CLI not found)
+- [ ] Default patterns path (`~/.config/fabric/patterns/`) and override via `patterns_path`
+
 ### Step 6.5: Final Testing
 - [ ] Test fresh installation
 - [ ] Test all commands
@@ -315,6 +331,7 @@ Use this for tracking progress during development.
 **Phase 2: Enhanced Picker Support**
 - [ ] Snacks.nvim picker integration
 - [ ] fzf-lua picker integration
+- [ ] Auto-detect Fabric CLI (`fabric-ai` vs `fabric`)
 
 **Phase 3: Pattern Management**
 - [ ] Pattern favorites system
@@ -343,26 +360,26 @@ Use this for tracking progress during development.
 ## File Checklist
 
 ### Core Files
-- [ ] `plugin/fabric-ai.lua`
-- [ ] `lua/fabric-ai/init.lua`
-- [ ] `lua/fabric-ai/config.lua`
+- [x] `plugin/fabric-ai.lua`
+- [x] `lua/fabric-ai/init.lua`
+- [x] `lua/fabric-ai/config.lua`
 - [ ] `lua/fabric-ai/commands.lua`
-- [ ] `lua/fabric-ai/picker.lua`
-- [ ] `lua/fabric-ai/processor.lua`
+- [x] `lua/fabric-ai/picker.lua`
+- [x] `lua/fabric-ai/processor.lua`
 - [ ] `lua/fabric-ai/window.lua`
 - [ ] `lua/fabric-ai/url.lua`
-- [ ] `lua/fabric-ai/patterns.lua`
+- [x] `lua/fabric-ai/patterns.lua`
 - [ ] `lua/fabric-ai/actions.lua`
-- [ ] `lua/fabric-ai/health.lua`
+- [x] `lua/fabric-ai/health.lua`
 
 ### Documentation
 - [ ] `doc/fabric-ai.txt`
 - [ ] `README.md`
-- [ ] `LICENSE`
+- [x] `LICENSE`
 
 ### Configuration
-- [ ] `.stylua.toml`
-- [ ] `.gitignore`
+- [x] `.stylua.toml`
+- [x] `.gitignore`
 
 ---
 

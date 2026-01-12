@@ -15,6 +15,9 @@ This document provides guidelines for AI coding agents (Claude, Cursor, Copilot,
 7. **Start simple** - Choose easier/OOB solutions for MVP; enhance later
 8. **Prefer built-ins** - Use Neovim native features over external dependencies when possible
 9. **Track progress visibly** - Use todo lists for multi-step work; update `PLAN_v1.md`; keep user informed
+10. **Preserve milestone checkpoints** - Only mark individual step items complete in PLAN_v1.md, NOT milestone checkpoint items - those are for user manual testing
+11. **Offer commits at milestones** - After completing a milestone implementation, ask user if they want to commit before proceeding
+12. **Document key decisions** - When making implementation choices (caching strategy, error handling, etc.), add them to the "Milestone X Decisions" table in PLAN_v1.md
 
 ---
 
@@ -292,8 +295,33 @@ If unclear about implementation:
 
 ---
 
+## Fabric CLI Reference
+
+**Pattern Discovery:**
+- `fabric-ai -l` - Lists all patterns, one per line (includes custom patterns)
+- Output format: plain text, one pattern name per line
+
+**Pattern Structure:**
+- Location: `~/.config/fabric/patterns/{pattern_name}/`
+- Files: `system.md` (required), `user.md` (optional)
+- Custom patterns are stored in the same directory
+
+**Execution:**
+- `fabric-ai -p <pattern>` - Run pattern with stdin input
+- `fabric-ai -y <url>` - Process YouTube URL (transcript extraction)
+- `fabric-ai -u <url>` - Process generic URL (web page content)
+- `fabric-ai --version` - Get CLI version
+- `fabric-ai -U` - Update/download patterns
+
+**Config Location:**
+- Fabric config: `~/.config/fabric/`
+- API keys stored in: `~/.config/fabric/.env` (NEVER read or expose this file)
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-01-12 | Initial guidelines |
+| 1.1 | 2026-01-12 | Added rules 10-12 (checkpoints, commits, decisions); Added Fabric CLI Reference |

@@ -108,9 +108,9 @@ fabric-ai.nvim/
 ```
 
 **Acceptance Criteria:**
-- [ ] Plugin loads without errors
-- [ ] `:checkhealth fabric-ai` reports Fabric CLI status
-- [ ] Configuration can be customized via `setup()`
+- [x] Plugin loads without errors
+- [x] `:checkhealth fabric-ai` reports Fabric CLI status (also available via `:Fabric health`)
+- [x] Configuration can be customized via `setup()`
 
 ---
 
