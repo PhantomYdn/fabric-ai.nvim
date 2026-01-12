@@ -1,3 +1,8 @@
+---
+id: PLAN_v1
+aliases: []
+tags: []
+---
 # Implementation Plan: fabric-ai.nvim MVP
 
 ## Overview
@@ -115,8 +120,8 @@ Use this for tracking progress during development.
 - [x] Route to appropriate picker implementation
 
 **Milestone 2 Checkpoint:**
-- [ ] Pattern list retrieved successfully
-- [ ] Telescope picker shows patterns with preview
+- [x] Pattern list retrieved successfully
+- [x] Telescope picker shows patterns with preview
 - [ ] vim.ui.select works when Telescope unavailable
 - [ ] Custom patterns directory supported
 
@@ -133,43 +138,58 @@ Use this for tracking progress during development.
 ## Milestone 3: Text Processing
 
 ### Step 3.1: Selection Capture
-**File:** `lua/fabric-ai/init.lua` or `lua/fabric-ai/selection.lua`
-- [ ] Create function to get visual selection text
-- [ ] Store selection range for later replacement
-- [ ] Handle multi-line selections
-- [ ] Handle different visual modes (v, V, Ctrl-V)
+**File:** `lua/fabric-ai/selection.lua`
+- [x] Create function to get visual selection text
+- [x] Store selection range for later replacement
+- [x] Handle multi-line selections
+- [x] Handle different visual modes (v, V, Ctrl-V)
 
 ### Step 3.2: Floating Window
 **File:** `lua/fabric-ai/window.lua`
-- [ ] Create floating window with configured dimensions
-- [ ] Set up buffer for output
-- [ ] Configure window options (wrap, modifiable, etc.)
-- [ ] Add border with title
-- [ ] Store window/buffer IDs for later access
+- [x] Create floating window with configured dimensions
+- [x] Set up buffer for output
+- [x] Configure window options (wrap, modifiable, etc.)
+- [x] Add border with title
+- [x] Store window/buffer IDs for later access
 
 ### Step 3.3: Streaming Execution
 **File:** `lua/fabric-ai/processor.lua` (extend)
-- [ ] Implement `vim.system()` with streaming stdout
-- [ ] Create callback for stdout chunks
-- [ ] Update floating window buffer on each chunk
-- [ ] Implement auto-scroll to bottom
-- [ ] Handle stderr for errors
-- [ ] Implement timeout handling
+- [x] Implement `vim.system()` with streaming stdout
+- [x] Create callback for stdout chunks
+- [x] Update floating window buffer on each chunk
+- [x] Implement auto-scroll to bottom
+- [x] Handle stderr for errors
+- [x] Implement timeout handling (via config.timeout)
 
 ### Step 3.4: Command Integration
 **File:** `lua/fabric-ai/commands.lua`
-- [ ] Implement `:Fabric` / `:Fabric run` command
-- [ ] Capture visual selection
-- [ ] Open pattern picker
-- [ ] Execute Fabric with selected pattern
-- [ ] Stream output to floating window
+- [x] Implement `:Fabric` / `:Fabric run` command
+- [x] Capture visual selection
+- [x] Open pattern picker
+- [x] Execute Fabric with selected pattern
+- [x] Stream output to floating window
 
 **Milestone 3 Checkpoint:**
-- [ ] Visual selection captured correctly
-- [ ] Floating window opens with correct size
-- [ ] Streaming output visible in real-time
+- [x] Visual selection captured correctly
+- [x] Floating window opens with correct size
+- [x] Streaming output visible in real-time
 - [ ] Auto-scroll works during streaming
 - [ ] UI remains responsive
+
+### Milestone 3 Decisions
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Selection capture module | Separate `selection.lua` | Single responsibility, reusable for URL processing |
+| Streaming display | Show data as-is (word by word) | Real-time feedback per user preference |
+| No selection handling | Error + abort | MVP simplicity; document future ideas (prompt for input) |
+| Error display | Show in window | Consistent UX, all output in one place |
+| Actions implementation | In commands.lua | Integrated with command flow, simpler architecture |
+
+### Future Enhancement Ideas (Milestone 3)
+- Prompt for input when no visual selection (`vim.ui.input`)
+- Use current buffer content as input
+- Use current line as input
+- Use word under cursor as input
 
 ---
 
@@ -363,13 +383,14 @@ Use this for tracking progress during development.
 - [x] `plugin/fabric-ai.lua`
 - [x] `lua/fabric-ai/init.lua`
 - [x] `lua/fabric-ai/config.lua`
-- [ ] `lua/fabric-ai/commands.lua`
+- [x] `lua/fabric-ai/commands.lua`
 - [x] `lua/fabric-ai/picker.lua`
 - [x] `lua/fabric-ai/processor.lua`
-- [ ] `lua/fabric-ai/window.lua`
+- [x] `lua/fabric-ai/window.lua`
+- [x] `lua/fabric-ai/selection.lua`
 - [ ] `lua/fabric-ai/url.lua`
 - [x] `lua/fabric-ai/patterns.lua`
-- [ ] `lua/fabric-ai/actions.lua`
+- [ ] `lua/fabric-ai/actions.lua` (actions implemented in commands.lua for MVP)
 - [x] `lua/fabric-ai/health.lua`
 
 ### Documentation

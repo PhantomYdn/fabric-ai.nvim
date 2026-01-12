@@ -133,6 +133,88 @@ function M.execute(args, input, on_complete)
   end)
 end
 
+---@class FabricAI.StreamCallbacks
+---@field on_stdout? fun(data: string) Called with each chunk of stdout data
+---@field on_stderr? fun(data: string) Called with each chunk of stderr data
+---@field on_complete? fun(code: number) Called when process completes
+
+---Execute a Fabric command with streaming output
+---Streams stdout/stderr data as it arrives for real-time display
+---@param args string[] Command arguments (e.g., {"-p", "summarize"})
+---@param input? string Text to send to stdin
+---@param callbacks FabricAI.StreamCallbacks Callbacks for streaming events
+function M.execute_streaming(args, input, callbacks)
+  callbacks = callbacks or {}
+
+  local available, err = M.is_available()
+  if not available then
+    vim.schedule(function()
+      if callbacks.on_stderr then
+        callbacks.on_stderr(err or "Fabric CLI not available")
+      end
+      if callbacks.on_complete then
+        callbacks.on_complete(1)
+      end
+    end)
+    return
+  end
+
+  local fabric_path = config.get "fabric_path"
+  local cmd = { fabric_path }
+  vim.list_extend(cmd, args)
+
+  ---@type vim.SystemOpts
+  local opts = {
+    text = true,
+    timeout = config.get "timeout",
+
+    -- Streaming stdout callback
+    stdout = function(err_msg, data)
+      if data then
+        vim.schedule(function()
+          if callbacks.on_stdout then
+            callbacks.on_stdout(data)
+          end
+        end)
+      end
+    end,
+
+    -- Streaming stderr callback
+    stderr = function(err_msg, data)
+      if data then
+        vim.schedule(function()
+          if callbacks.on_stderr then
+            callbacks.on_stderr(data)
+          end
+        end)
+      end
+    end,
+  }
+
+  if input then
+    opts.stdin = input
+  end
+
+  M._current_job = vim.system(cmd, opts, function(result)
+    vim.schedule(function()
+      M._current_job = nil
+      if callbacks.on_complete then
+        callbacks.on_complete(result.code)
+      end
+    end)
+  end)
+end
+
+---Run a pattern on input text with streaming output
+---Convenience function that wraps execute_streaming for pattern execution
+---@param pattern string Pattern name to run
+---@param input string Text to process
+---@param callbacks FabricAI.StreamCallbacks Callbacks for streaming events
+function M.run_pattern(pattern, input, callbacks)
+  -- Note: -s flag enables streaming output from Fabric CLI
+  M.execute_streaming({ "-s", "-p", pattern }, input, callbacks)
+end
+
 ---Cancel any running Fabric command
 function M.cancel()
   if M._current_job then

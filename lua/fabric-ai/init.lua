@@ -4,6 +4,9 @@
 ---@field health FabricAI.Health
 ---@field patterns FabricAI.Patterns
 ---@field picker FabricAI.Picker
+---@field selection FabricAI.Selection
+---@field window FabricAI.Window
+---@field commands FabricAI.Commands
 local M = {}
 
 M._VERSION = "0.1.0"
@@ -71,9 +74,34 @@ function M.get_pattern_prompt(name)
   return require("fabric-ai.patterns").get_system_prompt(name)
 end
 
+---Run the Fabric workflow on visual selection
+---This is the main entry point for programmatic use
+---@param opts? table Options (currently unused, for future expansion)
+function M.run(opts)
+  require("fabric-ai.commands").run(opts or {})
+end
+
+---Cancel any running Fabric command
+function M.cancel()
+  require("fabric-ai.processor").cancel()
+end
+
+---Check if a Fabric command is currently running
+---@return boolean
+function M.is_running()
+  return require("fabric-ai.processor").is_running()
+end
+
+---Close the output window if open
+function M.close_window()
+  require("fabric-ai.window").close()
+end
+
 ---Reset plugin state (mainly for testing/development)
 function M._reset()
   require("fabric-ai.config").reset()
+  require("fabric-ai.selection").clear_range()
+  require("fabric-ai.window").close()
   _setup_done = false
 end
 

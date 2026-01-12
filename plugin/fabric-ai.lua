@@ -13,22 +13,14 @@ end
 -- Subcommand definitions
 ---@type table<string, fun(opts: table)>
 local subcommands = {
-  -- Run pattern on text (default command)
-  run = function(_opts)
-    require("fabric-ai").pick_pattern(function(pattern)
-      if pattern then
-        -- Milestone 2: Notify selection (actual processing added in Milestone 3)
-        vim.notify(
-          "fabric-ai: Selected pattern '" .. pattern .. "' (processing coming in Milestone 3)",
-          vim.log.levels.INFO
-        )
-      end
-    end)
+  -- Run pattern on visual selection (default command)
+  run = function(opts)
+    require("fabric-ai.commands").run(opts)
   end,
 
   -- Health check subcommand (works even when lazy-loaded)
   health = function(_)
-    vim.cmd "checkhealth fabric-ai"
+    require("fabric-ai.commands").health()
   end,
 }
 
