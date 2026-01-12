@@ -9,6 +9,35 @@ local window = require "fabric-ai.window"
 local processor = require "fabric-ai.processor"
 local picker = require "fabric-ai.picker"
 
+---Set up keybindings during processing (cancel/quit only)
+---@param buf_id number Buffer ID
+local function setup_processing_keymaps(buf_id)
+  if not buf_id or not vim.api.nvim_buf_is_valid(buf_id) then
+    return
+  end
+
+  local keymap_opts = { buffer = buf_id, noremap = true, silent = true }
+
+  local function cancel_and_close()
+    processor.cancel()
+    window.append_text "\n\n[Cancelled]"
+    -- Small delay to show the message before closing
+    vim.defer_fn(function()
+      window.close()
+      selection.clear_range()
+    end, 100)
+  end
+
+  -- q closes/cancels
+  vim.keymap.set("n", "q", cancel_and_close, vim.tbl_extend("force", keymap_opts, { desc = "Cancel and close" }))
+
+  -- Escape also closes/cancels
+  vim.keymap.set("n", "<Esc>", cancel_and_close, vim.tbl_extend("force", keymap_opts, { desc = "Cancel and close" }))
+
+  -- Ctrl-C also closes/cancels
+  vim.keymap.set("n", "<C-c>", cancel_and_close, vim.tbl_extend("force", keymap_opts, { desc = "Cancel and close" }))
+end
+
 ---Run the main Fabric workflow: capture selection -> pick pattern -> execute -> display
 ---This is the handler for `:Fabric` and `:Fabric run`
 ---@param opts table Command options from nvim_create_user_command
@@ -17,7 +46,7 @@ function M.run(opts)
   local input_text, err = selection.get_visual_text()
 
   if not input_text then
-    vim.notify("fabric-ai: " .. (err or "No text selected"), vim.log.levels.ERROR)
+    vim.notify("fabric-ai: " .. (err or "No text selected"), vim.log.levels.WARN)
     vim.notify("fabric-ai: Select text in visual mode, then run :Fabric", vim.log.levels.INFO)
     return
   end
@@ -35,6 +64,9 @@ function M.run(opts)
       vim.notify("fabric-ai: " .. (win_err or "Failed to open window"), vim.log.levels.ERROR)
       return
     end
+
+    -- Step 3.5: Set up cancel keymaps during processing
+    setup_processing_keymaps(win_result.buf_id)
 
     -- Step 4: Execute with streaming
     processor.run_pattern(pattern, input_text, {
@@ -67,7 +99,7 @@ end
 ---These are implemented in Milestone 4, but we set up the basic structure here
 function M._setup_window_keymaps()
   local buf_id = window.get_buf_id()
-  if not buf_id then
+  if not buf_id or not vim.api.nvim_buf_is_valid(buf_id) then
     return
   end
 
@@ -81,6 +113,12 @@ function M._setup_window_keymaps()
 
   -- Escape also closes
   vim.keymap.set("n", "<Esc>", function()
+    window.close()
+    selection.clear_range()
+  end, vim.tbl_extend("force", keymap_opts, { desc = "Close window" }))
+
+  -- Ctrl-C also closes (processing already complete)
+  vim.keymap.set("n", "<C-c>", function()
     window.close()
     selection.clear_range()
   end, vim.tbl_extend("force", keymap_opts, { desc = "Close window" }))

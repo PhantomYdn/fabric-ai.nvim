@@ -196,49 +196,61 @@ Use this for tracking progress during development.
 ## Milestone 4: Output Actions
 
 ### Step 4.1: Action Keybindings
-**File:** `lua/fabric-ai/window.lua` (extend)
-- [ ] Set up buffer-local keymaps in output window
-- [ ] Implement `r` - replace action
-- [ ] Implement `y` - yank action
-- [ ] Implement `n` - new buffer action
-- [ ] Implement `q` - close action
+**File:** `lua/fabric-ai/commands.lua` (actions implemented here for MVP)
+- [x] Set up buffer-local keymaps in output window
+- [x] Implement `r` - replace action
+- [x] Implement `y` - yank action
+- [x] Implement `n` - new buffer action
+- [x] Implement `q` - close action
+- [x] Implement `<Esc>` - close action (alias for q)
+- [x] Implement `<C-c>` - cancel/close action
+- [x] Cancel keymaps during processing (q/Esc/C-c cancel and close)
 
 ### Step 4.2: Replace Action
-**File:** `lua/fabric-ai/actions.lua`
-- [ ] Retrieve stored selection range
-- [ ] Get output buffer content
-- [ ] Replace selection with output
-- [ ] Close floating window
-- [ ] Handle edge cases (deleted lines, etc.)
+**File:** `lua/fabric-ai/commands.lua`
+- [x] Retrieve stored selection range
+- [x] Get output buffer content
+- [x] Replace selection with output
+- [x] Close floating window
+- [x] Handle edge cases (deleted buffer, invalid range)
 
 ### Step 4.3: Yank Action
-**File:** `lua/fabric-ai/actions.lua` (continued)
-- [ ] Get output buffer content
-- [ ] Copy to system clipboard (`+` register)
-- [ ] Show confirmation message
-- [ ] Close floating window
+**File:** `lua/fabric-ai/commands.lua` (continued)
+- [x] Get output buffer content
+- [x] Copy to system clipboard (`+` register)
+- [x] Copy to unnamed register (`"`) for convenience
+- [x] Show confirmation message
+- [x] Close floating window
 
 ### Step 4.4: New Buffer Action
-**File:** `lua/fabric-ai/actions.lua` (continued)
-- [ ] Get output buffer content
-- [ ] Create new buffer
-- [ ] Set buffer content
-- [ ] Set filetype (markdown by default)
-- [ ] Close floating window
-- [ ] Focus new buffer
+**File:** `lua/fabric-ai/commands.lua` (continued)
+- [x] Get output buffer content
+- [x] Create new buffer
+- [x] Set buffer content
+- [x] Set filetype (markdown by default)
+- [x] Close floating window
+- [x] Focus new buffer
 
 ### Step 4.5: Window Footer/Header
-**File:** `lua/fabric-ai/window.lua` (extend)
-- [ ] Add action hints to window border or footer
-- [ ] Format: `[r]eplace [y]ank [n]ew buffer [q]uit`
-- [ ] Update title to show pattern name
+**File:** `lua/fabric-ai/window.lua`
+- [x] Add action hints to window border or footer
+- [x] Format: `[r]eplace [y]ank [n]ew buffer [q]uit`
+- [x] Update title to show pattern name
 
 **Milestone 4 Checkpoint:**
-- [ ] All four actions work correctly
-- [ ] Action hints visible in window
-- [ ] Replace preserves undo history
-- [ ] Yank uses system clipboard
-- [ ] New buffer has correct filetype
+- [x] All four actions work correctly
+- [x] Action hints visible in window
+- [x] Replace preserves undo history
+- [x] Yank uses system clipboard
+- [x] New buffer has correct filetype
+
+### Milestone 4 Decisions
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Actions location | `commands.lua` | Integrated with command flow, simpler architecture for MVP |
+| Block-wise visual mode | Not fully supported | Complex multi-line replacement; defer to post-MVP. Character/line modes work. |
+| Cancel during processing | q/Esc/C-c all cancel | Consistent UX, user can always exit |
+| Cancelled message | Show "[Cancelled]" briefly | User feedback that cancel was successful |
 
 ---
 
