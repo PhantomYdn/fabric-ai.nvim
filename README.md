@@ -2,11 +2,12 @@
 
 A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fabric)'s 220+ text processing patterns directly into your editor.
 
-> **Status:** In Development (MVP)
+> **Version 1.0.0** - MVP Complete
 
 ## Features
 
 - **Visual Selection Processing** - Select text and apply any Fabric pattern
+- **URL Processing** - Process YouTube transcripts and web page content
 - **Pattern Picker** - Fuzzy search with Telescope (or vim.ui.select fallback)
 - **Pattern Preview** - See pattern descriptions before applying
 - **Streaming Output** - Real-time display as Fabric processes
@@ -18,7 +19,7 @@ A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fa
 
 - Neovim 0.10.0+
 - [Fabric AI CLI](https://github.com/danielmiessler/fabric) (`fabric-ai`)
-- Optional: [Telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) for enhanced picker
+- Optional: [Telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) for enhanced picker with preview
 
 ## Installation
 
@@ -26,8 +27,11 @@ A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fa
 
 ```lua
 {
-  "yourusername/fabric-ai.nvim",
+  "PhantomYdn/fabric-ai.nvim",
   cmd = { "Fabric" },
+  dependencies = {
+    { "nvim-telescope/telescope.nvim", optional = true },
+  },
   opts = {
     -- Default configuration (all optional)
     fabric_path = "fabric-ai",     -- Path to Fabric CLI
@@ -41,6 +45,7 @@ A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fa
   },
   keys = {
     { "<leader>fa", ":'<,'>Fabric<CR>", mode = "v", desc = "Fabric AI" },
+    { "<leader>fu", ":Fabric url<CR>", mode = "n", desc = "Fabric URL" },
   },
 }
 ```
@@ -49,15 +54,22 @@ A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fa
 
 ```lua
 {
-  "yourusername/fabric-ai.nvim",
+  "PhantomYdn/fabric-ai.nvim",
   event = "VeryLazy",
+  dependencies = {
+    { "nvim-telescope/telescope.nvim", optional = true },
+  },
   opts = {},
 }
 ```
 
+### Note on Lazy-Loading
+
+When using `cmd = { "Fabric" }`, the plugin loads on first command invocation. Run `:Fabric health` to trigger loading and verify your setup. If you prefer the plugin to load at startup (for immediate CLI validation), use `event = "VeryLazy"` instead.
+
 ## Usage
 
-### Basic Workflow
+### Text Processing
 
 1. Select text in visual mode (`v`, `V`, or `<C-v>`)
 2. Run `:Fabric`
@@ -74,11 +86,22 @@ A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fa
 | `<Esc>` | Quit | Same as `q` |
 | `<C-c>` | Quit | Same as `q` |
 
+### URL Processing
+
+Process web pages and YouTube videos without copying content manually:
+
+1. Place cursor on a URL in your buffer
+2. Run `:Fabric url`
+3. Pick a pattern
+4. View output and choose an action
+
+**YouTube URLs** (youtube.com, youtu.be) automatically extract transcripts using Fabric's `-y` flag.
+
+**Other URLs** fetch and process web page content using Fabric's `-u` flag.
+
 ### During Processing
 
-While Fabric is processing, you can cancel at any time:
-
-- Press `q`, `<Esc>`, or `<C-c>` to cancel and close
+While Fabric is processing, you can cancel at any time by pressing `q`, `<Esc>`, or `<C-c>`.
 
 ### Commands
 
@@ -86,20 +109,65 @@ While Fabric is processing, you can cancel at any time:
 |---------|-------------|
 | `:Fabric` | Process visual selection with pattern picker |
 | `:Fabric run` | Same as `:Fabric` |
+| `:Fabric url` | Process URL under cursor |
 | `:Fabric health` | Run health check (`:checkhealth fabric-ai`) |
 
-### Health Check
+## Use Case Examples
 
-Verify your setup:
+### Summarize Long Text
 
-```vim
-:checkhealth fabric-ai
+```
+1. Select a long article or documentation
+2. :Fabric
+3. Select "summarize" pattern
+4. Press `r` to replace with summary, or `y` to copy
 ```
 
-Or:
+### Extract Wisdom from YouTube Video
 
-```vim
-:Fabric health
+```
+1. Paste a YouTube URL in your buffer
+2. Place cursor on the URL
+3. :Fabric url
+4. Select "extract_wisdom" pattern
+5. Press `n` to open insights in new buffer
+```
+
+### Clean Text for Obsidian Notes
+
+```
+1. Select messy text (web copy, email, etc.)
+2. :Fabric
+3. Select "clean_text" or "improve_writing" pattern
+4. Press `r` to replace with clean version
+```
+
+### Explain Code
+
+```
+1. Select a function or code block
+2. :Fabric
+3. Select "explain_code" pattern
+4. Press `n` to open explanation in new buffer
+```
+
+### Improve Writing
+
+```
+1. Select your draft text
+2. :Fabric
+3. Select "improve_writing" pattern
+4. Press `r` to replace, or `y` to compare
+```
+
+### Analyze Web Article
+
+```
+1. Paste article URL in buffer
+2. Place cursor on URL
+3. :Fabric url
+4. Select "analyze_paper" or "extract_main_idea"
+5. Press `n` to review analysis
 ```
 
 ## Configuration
@@ -124,7 +192,7 @@ require("fabric-ai").setup({
     border = "rounded",  -- Border style
   },
   
-  -- Default output action (not yet implemented)
+  -- Default output action (reserved for future use)
   default_action = "window",
 })
 ```
@@ -132,6 +200,17 @@ require("fabric-ai").setup({
 ### Border Styles
 
 Valid border styles: `"none"`, `"single"`, `"double"`, `"rounded"`, `"solid"`, `"shadow"`
+
+### Configuration Validation
+
+The plugin validates your configuration on setup. Invalid values trigger a warning via `vim.notify()` and fall back to sensible defaults. For example:
+
+- `timeout = -100` warns and uses `120000`
+- `window.width = 2.0` warns and uses `0.8`
+
+### Fabric CLI Check
+
+On setup, the plugin checks if the Fabric CLI is available. If not found, a warning is displayed. This helps catch configuration issues early.
 
 ## How It Works
 
@@ -142,9 +221,31 @@ Valid border styles: `"none"`, `"single"`, `"double"`, `"rounded"`, `"solid"`, `
 5. **Real-time Display** - Shows output in floating window as it streams
 6. **Output Actions** - Apply chosen action (replace, yank, new buffer, or discard)
 
+For URL processing, the flow is similar but uses `-y` (YouTube) or `-u` (web) flags instead of stdin.
+
+## Health Check
+
+Verify your setup with:
+
+```vim
+:checkhealth fabric-ai
+```
+
+Or:
+
+```vim
+:Fabric health
+```
+
+This checks:
+- Neovim version (0.10.0+ required)
+- Fabric CLI availability and version
+- Patterns directory existence
+
 ## Known Limitations
 
 - **Block-wise visual mode** (`<C-v>`) is not fully supported for the replace action. Character-wise (`v`) and line-wise (`V`) modes work correctly.
+- **Telescope recommended** - Without Telescope, the fallback picker (vim.ui.select) lacks pattern preview.
 
 ## Troubleshooting
 
@@ -169,6 +270,24 @@ fabric-ai -l
 ### Plugin not loading
 
 If using `cmd = { "Fabric" }`, the plugin loads lazily. Run `:Fabric health` to trigger load and check status.
+
+### Processing times out
+
+Increase the timeout for long content or slow connections:
+
+```lua
+opts = {
+  timeout = 300000,  -- 5 minutes
+}
+```
+
+## Documentation
+
+Full documentation available via:
+
+```vim
+:help fabric-ai
+```
 
 ## Contributing
 

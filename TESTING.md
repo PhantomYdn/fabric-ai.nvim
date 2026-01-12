@@ -461,6 +461,174 @@ Fabric Version: [fabric-ai --version]
 
 ---
 
+## Milestone 6: Polish & Documentation
+
+### Test 23: Health Check Pass
+
+**Steps:**
+1. Ensure Fabric CLI is installed and in PATH
+2. Run `:checkhealth fabric-ai`
+
+**Expected:**
+- "Neovim version" shows OK (0.10.0+)
+- "Fabric CLI" shows OK with version number
+- "Patterns directory" shows OK
+
+**Pass Criteria:** All health checks pass with OK status
+
+---
+
+### Test 24: Fabric Health Command
+
+**Steps:**
+1. Run `:Fabric health`
+
+**Expected:**
+- Opens checkhealth buffer
+- Shows fabric-ai section
+- Same output as `:checkhealth fabric-ai`
+
+**Pass Criteria:** Command runs checkhealth correctly
+
+---
+
+### Test 25: Vimdoc Help
+
+**Steps:**
+1. Run `:help fabric-ai`
+
+**Expected:**
+- Help buffer opens
+- Shows fabric-ai.txt content
+- Table of contents visible
+- All sections accessible via tags (e.g., `:help fabric-ai-commands`)
+
+**Variations to test:**
+- `:help fabric-ai-configuration`
+- `:help fabric-ai-window`
+- `:help :Fabric`
+- `:help :Fabric-url`
+
+**Pass Criteria:** Help documentation loads and is navigable
+
+---
+
+### Test 26: vim.ui.select Fallback
+
+**Steps:**
+1. Temporarily disable Telescope (rename plugin directory or uninstall)
+2. Restart Neovim
+3. Select some text
+4. Run `:Fabric`
+
+**Expected:**
+- vim.ui.select picker opens (native Neovim UI)
+- Pattern list is displayed
+- Selection works
+- Processing continues normally
+
+**Pass Criteria:** Plugin works without Telescope
+
+---
+
+### Test 27: Config Validation Warning
+
+**Steps:**
+1. Configure plugin with invalid values:
+   ```lua
+   require("fabric-ai").setup({
+     timeout = -100,
+     window = {
+       width = 5.0,
+     },
+   })
+   ```
+2. Observe notifications
+
+**Expected:**
+- Warning: "timeout must be a positive number" (or similar)
+- Warning: "window.width must be between 0 and 1" (or similar)
+- Plugin still works with default values
+
+**Pass Criteria:** Invalid config warns but doesn't break plugin
+
+---
+
+### Test 28: Fresh Installation Test
+
+**Purpose:** Verify complete installation procedure works
+
+**Steps:**
+1. Remove any existing fabric-ai.nvim installation
+2. Add to lazy.nvim config:
+   ```lua
+   {
+     "PhantomYdn/fabric-ai.nvim",
+     cmd = { "Fabric" },
+     opts = {},
+   }
+   ```
+3. Run `:Lazy sync` or restart Neovim
+4. Run `:Fabric health`
+5. Select text, run `:Fabric`
+6. Select pattern, verify output
+7. Test an action (y, n, r, or q)
+
+**Expected:**
+- Plugin installs without errors
+- Health check passes
+- Text processing works
+- Actions work correctly
+
+**Pass Criteria:** End-to-end workflow succeeds on fresh install
+
+---
+
+### Test 29: Timeout Handling
+
+**Steps:**
+1. Configure a very short timeout:
+   ```lua
+   opts = {
+     timeout = 1000,  -- 1 second
+   }
+   ```
+2. Select a large amount of text
+3. Run `:Fabric` and select a pattern
+4. Wait for timeout
+
+**Expected:**
+- Processing stops after timeout
+- Error message about timeout displayed
+- Window can be closed normally
+
+**Note:** This test requires a pattern/input that takes longer than 1 second
+
+**Pass Criteria:** Timeout handled gracefully without crash
+
+---
+
+## Quick Regression Test (Updated)
+
+For rapid verification after changes, run these in order:
+
+**Core Functionality:**
+1. `V` line 2 -> `:Fabric` -> select pattern -> `y` -> verify clipboard
+2. `V` line 3 -> `:Fabric` -> select pattern -> `n` -> verify new buffer
+3. `V` line 4 -> `:Fabric` -> select pattern -> `r` -> verify replacement
+4. `v` select partial -> `:Fabric` -> `q` -> verify window closes
+5. No selection -> `:Fabric` -> verify warning (no error)
+
+**URL Processing:**
+6. Cursor on https://example.com -> `:Fabric url` -> select pattern -> `q`
+7. Cursor on YouTube URL -> `:Fabric url` -> verify pattern picker opens
+
+**Documentation & Health:**
+8. `:Fabric health` -> verify health check runs
+9. `:help fabric-ai` -> verify help loads
+
+---
+
 ## Adding New Tests
 
 When implementing new features:
@@ -477,3 +645,5 @@ When implementing new features:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-01-12 | Initial testing guide for Milestone 4 |
+| 1.1 | 2026-01-12 | Added Milestone 5 URL processing tests |
+| 1.2 | 2026-01-12 | Added Milestone 6 polish tests (Tests 23-29) |

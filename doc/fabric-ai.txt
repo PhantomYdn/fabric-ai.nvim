@@ -1,0 +1,429 @@
+*fabric-ai.txt*  Fabric AI integration for Neovim
+
+Author:   PhantomYdn
+License:  MIT
+Version:  1.0.0
+
+==============================================================================
+CONTENTS                                                 *fabric-ai-contents*
+
+    1. Introduction ................................ |fabric-ai-introduction|
+    2. Requirements ................................ |fabric-ai-requirements|
+    3. Installation ................................ |fabric-ai-installation|
+    4. Commands .................................... |fabric-ai-commands|
+    5. Configuration ............................... |fabric-ai-configuration|
+    6. Output Window ............................... |fabric-ai-window|
+    7. Usage ....................................... |fabric-ai-usage|
+    8. Troubleshooting ............................. |fabric-ai-troubleshooting|
+    9. License ..................................... |fabric-ai-license|
+
+==============================================================================
+1. INTRODUCTION                                      *fabric-ai-introduction*
+
+fabric-ai.nvim integrates Fabric AI's 220+ text processing patterns directly
+into Neovim. Process text, summarize content, extract insights from YouTube
+videos, and more - all without leaving your editor.
+
+Fabric AI (https://github.com/danielmiessler/fabric) provides battle-tested,
+community-maintained AI patterns for common text transformation tasks. This
+plugin brings those patterns to your fingertips with:
+
+- Visual selection processing with streaming output
+- Pattern picker with fuzzy search (Telescope or vim.ui.select)
+- Pattern preview showing what each pattern does
+- Floating window with real-time output display
+- URL processing (YouTube transcripts, web pages)
+- Output actions (replace, yank, new buffer)
+
+==============================================================================
+2. REQUIREMENTS                                      *fabric-ai-requirements*
+
+Required:~
+- Neovim 0.10.0 or later (for `vim.system()` async support)
+- Fabric AI CLI (`fabric-ai`) installed and in PATH
+  https://github.com/danielmiessler/fabric
+
+Optional:~
+- telescope.nvim for enhanced pattern picker with preview
+  https://github.com/nvim-telescope/telescope.nvim
+
+Without Telescope, the plugin falls back to |vim.ui.select()| which works
+but lacks pattern preview functionality.
+
+==============================================================================
+3. INSTALLATION                                      *fabric-ai-installation*
+
+Using lazy.nvim:~
+>lua
+    {
+      "PhantomYdn/fabric-ai.nvim",
+      cmd = { "Fabric" },
+      dependencies = {
+        { "nvim-telescope/telescope.nvim", optional = true },
+      },
+      opts = {},
+      keys = {
+        { "<leader>fa", ":'<,'>Fabric<CR>", mode = "v", desc = "Fabric AI" },
+        { "<leader>fu", ":Fabric url<CR>", mode = "n", desc = "Fabric URL" },
+      },
+    }
+<
+
+Using lazy.nvim (eager loading):~
+>lua
+    {
+      "PhantomYdn/fabric-ai.nvim",
+      event = "VeryLazy",
+      opts = {},
+    }
+<
+
+Note on lazy-loading:~
+When using `cmd = { "Fabric" }`, the plugin loads on first command invocation.
+Run `:Fabric health` to trigger loading and verify your setup.
+
+==============================================================================
+4. COMMANDS                                              *fabric-ai-commands*
+
+                                                                    *:Fabric*
+:Fabric                     Process visual selection with a Fabric pattern.
+                            Opens pattern picker, then streams output to a
+                            floating window.
+
+:Fabric run                 Same as `:Fabric`. Explicitly invokes the run
+                            subcommand.
+
+                                                                *:Fabric-url*
+:Fabric url                 Process URL under cursor with a Fabric pattern.
+                            Automatically detects YouTube URLs and uses
+                            transcript extraction (`-y` flag). Other URLs
+                            use web content extraction (`-u` flag).
+
+                                                             *:Fabric-health*
+:Fabric health              Run health checks. Equivalent to running
+                            `:checkhealth fabric-ai`.
+
+==============================================================================
+5. CONFIGURATION                                    *fabric-ai-configuration*
+
+Call the setup function to configure the plugin:
+>lua
+    require("fabric-ai").setup({
+      -- Path to Fabric CLI executable
+      fabric_path = "fabric-ai",
+
+      -- Custom patterns directory (nil = auto-detect)
+      -- Default: ~/.config/fabric/patterns/
+      patterns_path = nil,
+
+      -- Command timeout in milliseconds (default: 2 minutes)
+      timeout = 120000,
+
+      -- Floating window settings
+      window = {
+        width = 0.8,         -- Fraction of editor width (0.0-1.0)
+        height = 0.8,        -- Fraction of editor height (0.0-1.0)
+        border = "rounded",  -- Border style (see below)
+      },
+
+      -- Default output action (reserved for future use)
+      default_action = "window",
+    })
+<
+
+                                                    *fabric-ai-config-options*
+fabric_path~
+    Type: `string`
+    Default: `"fabric-ai"`
+
+    Path to the Fabric CLI executable. If not in PATH, specify the full path:
+>lua
+    fabric_path = "/home/user/.local/bin/fabric-ai"
+<
+
+patterns_path~
+    Type: `string` or `nil`
+    Default: `nil` (auto-detect)
+
+    Custom patterns directory. When `nil`, the plugin auto-detects the
+    default location at `~/.config/fabric/patterns/`. This is used for
+    pattern preview in Telescope.
+
+timeout~
+    Type: `number`
+    Default: `120000` (2 minutes)
+
+    Command timeout in milliseconds. Long-running patterns (like YouTube
+    transcript processing) may need higher values. Set to 0 for no timeout
+    (not recommended).
+
+window.width~
+    Type: `number`
+    Default: `0.8`
+
+    Floating window width as fraction of editor width (0.0-1.0).
+
+window.height~
+    Type: `number`
+    Default: `0.8`
+
+    Floating window height as fraction of editor height (0.0-1.0).
+
+window.border~
+    Type: `string`
+    Default: `"rounded"`
+
+    Border style for the floating window. Valid values:
+    `"none"`, `"single"`, `"double"`, `"rounded"`, `"solid"`, `"shadow"`
+
+                                                 *fabric-ai-config-validation*
+Configuration Validation~
+
+The plugin validates configuration on setup. Invalid values trigger a warning
+via |vim.notify()| and fall back to defaults. Examples:
+
+- `timeout = -100` warns and uses `120000`
+- `window.width = 2.0` warns and uses `0.8`
+- `fabric_path = 123` warns and uses `"fabric-ai"`
+
+==============================================================================
+6. OUTPUT WINDOW                                          *fabric-ai-window*
+
+After selecting a pattern, output streams to a floating window. The window
+displays:
+
+- Title: Pattern name being executed
+- Footer: Available action keybindings
+- Content: Streaming output from Fabric
+
+                                                        *fabric-ai-window-keys*
+Window Keybindings~
+
+These keybindings are active in the output window:
+
+    Key         Action          Description~
+    `r`           Replace         Replace original selection with output
+    `y`           Yank            Copy output to system clipboard
+    `n`           New buffer      Open output in new markdown buffer
+    `q`           Quit            Close window, discard output
+    `<Esc>`       Quit            Same as `q`
+    `<C-c>`       Quit            Same as `q`
+
+During processing, `q`, `<Esc>`, and `<C-c>` will cancel the operation and
+close the window.
+
+                                                     *fabric-ai-window-actions*
+Action Details~
+
+Replace (`r`)~
+    Replaces the original visual selection with the Fabric output. Works with
+    character-wise (`v`) and line-wise (`V`) visual modes. Preserves undo
+    history - use `u` to restore original text.
+
+    Note: Block-wise visual mode (`<C-v>`) has limited support for replace.
+
+Yank (`y`)~
+    Copies output to both the system clipboard (`+` register) and unnamed
+    register (`"`). Shows confirmation message.
+
+New buffer (`n`)~
+    Opens a new buffer with the output content. Buffer filetype is set to
+    `markdown` for syntax highlighting. Buffer is listed in `:ls`.
+
+Quit (`q`, `<Esc>`, `<C-c>`)~
+    Closes the window and discards output. Original selection unchanged.
+    During processing, this cancels the Fabric execution.
+
+==============================================================================
+7. USAGE                                                    *fabric-ai-usage*
+
+                                                    *fabric-ai-usage-text*
+Text Processing~
+
+Basic workflow:
+1. Select text in visual mode (`v`, `V`, or `<C-v>`)
+2. Run `:Fabric`
+3. Pick a pattern from the fuzzy finder
+4. View streaming output in floating window
+5. Choose an action: `r` (replace), `y` (yank), `n` (new buffer), `q` (quit)
+
+                                                     *fabric-ai-usage-url*
+URL Processing~
+
+Process web content or YouTube transcripts:
+1. Place cursor on a URL
+2. Run `:Fabric url`
+3. Pick a pattern
+4. View output and choose an action
+
+YouTube URLs (youtube.com, youtu.be) automatically use transcript extraction.
+Other URLs fetch and process the web page content.
+
+                                                *fabric-ai-usage-examples*
+Use Case Examples~
+
+Summarize long text:~
+>
+    1. Select a long article or documentation
+    2. :Fabric
+    3. Select "summarize" pattern
+    4. Press `r` to replace with summary, or `y` to copy
+<
+
+Extract wisdom from YouTube video:~
+>
+    1. Paste a YouTube URL in your buffer
+    2. Place cursor on the URL
+    3. :Fabric url
+    4. Select "extract_wisdom" pattern
+    5. Press `n` to open insights in new buffer
+<
+
+Clean text for Obsidian notes:~
+>
+    1. Select messy text (web copy, email, etc.)
+    2. :Fabric
+    3. Select "clean_text" or "improve_writing" pattern
+    4. Press `r` to replace with clean version
+<
+
+Explain code:~
+>
+    1. Select a function or code block
+    2. :Fabric
+    3. Select "explain_code" pattern
+    4. Press `n` to open explanation in new buffer
+<
+
+Improve writing:~
+>
+    1. Select your draft text
+    2. :Fabric
+    3. Select "improve_writing" pattern
+    4. Press `r` to replace, or `y` to compare
+<
+
+Create social media post:~
+>
+    1. Select content to share
+    2. :Fabric
+    3. Select "write_tweet" or similar pattern
+    4. Press `y` to copy to clipboard
+<
+
+Analyze web article:~
+>
+    1. Paste article URL in buffer
+    2. Place cursor on URL
+    3. :Fabric url
+    4. Select "analyze_paper" or "extract_main_idea"
+    5. Press `n` to review analysis
+<
+
+==============================================================================
+8. TROUBLESHOOTING                                *fabric-ai-troubleshooting*
+
+                                            *fabric-ai-troubleshooting-cli*
+"Fabric CLI not found"~
+
+The plugin cannot find the `fabric-ai` executable.
+
+Solutions:
+1. Ensure Fabric AI is installed: https://github.com/danielmiessler/fabric
+2. Verify it's in PATH: run `which fabric-ai` in terminal
+3. Configure the full path:
+>lua
+    opts = {
+      fabric_path = "/full/path/to/fabric-ai",
+    }
+<
+
+                                        *fabric-ai-troubleshooting-patterns*
+"No patterns found"~
+
+Fabric has no patterns installed.
+
+Solutions:
+1. Download patterns: run `fabric-ai -U` in terminal
+2. Verify patterns exist: run `fabric-ai -l` in terminal
+3. Check patterns directory exists: `~/.config/fabric/patterns/`
+
+                                         *fabric-ai-troubleshooting-loading*
+Plugin not loading~
+
+With `cmd = { "Fabric" }`, the plugin loads lazily on first command.
+
+Solutions:
+1. Run `:Fabric health` to trigger load and check status
+2. Use `event = "VeryLazy"` for eager loading
+3. Verify installation path in your plugin manager
+
+                                        *fabric-ai-troubleshooting-telescope*
+Telescope picker not showing~
+
+The plugin falls back to vim.ui.select if Telescope isn't available.
+
+Solutions:
+1. Install telescope.nvim
+2. Ensure Telescope loads before using `:Fabric`
+3. vim.ui.select fallback works but lacks preview
+
+                                         *fabric-ai-troubleshooting-timeout*
+Processing times out~
+
+Long content or slow network can cause timeouts.
+
+Solutions:
+1. Increase timeout in config:
+>lua
+    opts = {
+      timeout = 300000,  -- 5 minutes
+    }
+<
+2. Use smaller text selections
+3. Check network connection for URL processing
+
+                                       *fabric-ai-troubleshooting-selection*
+"No visual selection found"~
+
+The `:Fabric` command was run without selecting text first.
+
+Solution: Select text with `v`, `V`, or `<C-v>` before running `:Fabric`
+
+                                             *fabric-ai-troubleshooting-url*
+"No URL found under cursor"~
+
+The `:Fabric url` command couldn't detect a URL at cursor position.
+
+Solutions:
+1. Place cursor directly on the URL text
+2. Ensure URL format is valid (http://, https://, or www.)
+3. URL must be on a single line
+
+==============================================================================
+9. LICENSE                                                *fabric-ai-license*
+
+MIT License
+
+Copyright (c) 2024 PhantomYdn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
