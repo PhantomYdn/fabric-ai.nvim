@@ -379,9 +379,9 @@ Use this for tracking progress during development.
 
 ## Post-MVP Tracking
 
-### Future Phase Items (Document for Later)
+### Future Features (Post-MVP)
 
-**Phase 2: Enhanced Input Modes**
+**Enhanced Input Modes**
 - [ ] Motion/operator support (e.g., `<leader>f5j` for next 5 lines, `<leader>fap` for paragraph)
   - Implementation: `vim.go.operatorfunc` with user-configured keybinding
   - Uses `'[` and `']` marks to get motion range
@@ -391,32 +391,63 @@ Use this for tracking progress during development.
   - Future: Small floating window for multi-line prompt entry
   - Use case: Complex questions or pasting content directly
 
-**Phase 3: Enhanced Picker Support**
+**Enhanced Picker Support**
 - [ ] Snacks.nvim picker integration
 - [ ] fzf-lua picker integration
-- [ ] Auto-detect Fabric CLI (`fabric-ai` vs `fabric`)
 
-**Phase 4: Pattern Management**
+**Pattern Management**
 - [ ] Pattern favorites system
 - [ ] Recent patterns history
 - [ ] Quick-repeat last pattern
 
-**Phase 5: Advanced Features**
+**Direct Pattern Execution**
+- [ ] Add command-line completion for `:Fabric run <pattern>`
+  - Use `-complete=customlist,Function` for custom completion
+  - Cache pattern list for fast completion
+- [ ] Implement smart pattern matching on execution:
+  - Exact match → skip picker, process immediately
+  - Single partial match → skip picker, process immediately
+  - No match or multiple matches → open picker with partial input as `default_text`
+- [ ] Update documentation with keybinding examples
+
+**Enhanced Link Processing**
+- [ ] Create `lua/fabric-ai/link.lua` module
+- [ ] Implement link detection under cursor:
+  - Markdown links: `[text](./path)`, `[text](./path#section)`
+  - Wiki-style links: `[[Note Name]]`, `[[folder/note]]`
+  - File paths: `./relative`, `~/home`, `/absolute`
+- [ ] Implement section anchor extraction (e.g., `#section-name` → extract only that section)
+- [ ] Add config option: `link.max_lines` (default: nil = entire file)
+- [ ] Implement `:Fabric link` command
+- [ ] Fall back to `:Fabric url` for HTTP(S) URLs
+- [ ] Update documentation
+
+**Advanced Features**
 - [ ] Model selection UI
 - [ ] Editable output window
 - [ ] Multiple concurrent sessions
 - [ ] Fabric context integration
 
-**Phase 6: Developer Experience**
+**Developer Experience**
 - [ ] GitHub Actions CI/CD
 - [ ] Automated tests (busted)
 - [ ] LuaCov coverage
 - [ ] Auto-release to luarocks
 
-**Phase 7: Integrations**
-- [ ] Lualine status component
-- [ ] Which-key integration
-- [ ] Mini.nvim support
+**Lualine Integration**
+- [ ] Lualine status component showing processing state
+
+**Which-key Integration**
+- [ ] Which-key hints for Fabric commands
+
+**Mini.nvim Integration**
+- [ ] Mini.pick picker support
+- [ ] Mini.nvim window components
+
+**Auto-detect Fabric CLI**
+- [ ] Support both `fabric-ai` and `fabric` binary names
+- [ ] Auto-detect available binary on startup
+- [ ] Update health check to report detected binary
 
 ---
 

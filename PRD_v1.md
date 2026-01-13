@@ -228,38 +228,58 @@ fabric-ai.nvim/
 
 ---
 
-## 5. Future Phases (Post-MVP)
+## 5. Future Features (Post-MVP)
 
-### Phase 2: Enhanced Picker Support
-- **Snacks.nvim Integration**: Support snacks.nvim picker as alternative
-- **fzf-lua Integration**: Support fzf-lua picker
-- **Priority**: Medium
+### Enhanced Input Modes
+- Motion/operator support (e.g., `<leader>fap` for paragraph, `<leader>f5j` for next 5 lines)
+- Multi-line prompt input via floating window (instead of single-line `vim.ui.input`)
 
-### Phase 3: Pattern Management
-- **Favorites**: Mark frequently used patterns
-- **History**: Track recently used patterns
-- **Quick Access**: Keybinding for last-used pattern
-- **Priority**: Medium
+### Enhanced Picker Support
+- Snacks.nvim picker integration
+- fzf-lua picker integration
 
-### Phase 4: Advanced Features
-- **Model Selection**: UI for choosing Fabric model
-- **Editable Output**: Allow editing in output window before action
-- **Multiple Sessions**: Support concurrent Fabric executions
-- **Context Integration**: Use Fabric's context system
-- **Priority**: Low
+### Pattern Management
+- Mark frequently used patterns as favorites
+- Track recently used patterns (history)
+- Quick-repeat keybinding for last-used pattern
 
-### Phase 5: Developer Experience
-- **CI/CD Pipeline**: GitHub Actions (StyLua, luacheck, tests)
-- **Automated Tests**: Unit tests with busted
-- **Coverage Reports**: LuaCov integration
-- **Auto-release**: luarocks + GitHub releases
-- **Priority**: Medium
+### Direct Pattern Execution
+- Command-line completion: Tab-complete pattern names in `:Fabric run <pattern>`
+- Smart execution: Exact/single partial match → skip picker; no match/multiple → open picker with pre-filter
+- Use case: Keybindings for specific patterns (e.g., `:%Fabric run summarize`)
 
-### Phase 6: Integrations
-- **Lualine Component**: Status indicator during processing
-- **Which-key Integration**: Keybinding hints
-- **Mini.nvim Support**: Alternative picker/window
-- **Priority**: Low
+### Enhanced Link Processing
+- New command `:Fabric link` to process content from links under cursor
+- Supported link types: Markdown links `[text](./path)`, wiki links `[[Note]]`, file paths `./file.lua`
+- Section anchors: Extract only referenced section when link includes `#section-name`
+- Configurable file size limit via `config.link.max_lines` (default: entire file)
+- Falls back to `:Fabric url` for HTTP(S) URLs
+
+### Advanced Features
+- Model selection UI for choosing Fabric model
+- Editable output window (edit before applying action)
+- Multiple concurrent Fabric sessions
+- Fabric context system integration
+
+### Developer Experience
+- GitHub Actions CI/CD (StyLua, luacheck, tests)
+- Automated tests with busted framework
+- LuaCov coverage reports
+- Auto-release to luarocks + GitHub releases
+
+### Lualine Integration
+- Status indicator component during Fabric processing
+
+### Which-key Integration
+- Keybinding hints for Fabric commands
+
+### Mini.nvim Integration
+- Alternative picker using mini.pick
+- Alternative window using mini.nvim components
+
+### Auto-detect Fabric CLI
+- Support both `fabric-ai` and `fabric` binary names
+- Auto-detect which binary is available on system
 
 ---
 
@@ -286,6 +306,8 @@ fabric-ai.nvim/
 | US-10 | User | See recently used patterns | I can repeat common tasks |
 | US-11 | Developer | Edit output before replacing | I can make adjustments |
 | US-12 | User | Use snacks.nvim picker | I can use my preferred picker |
+| US-13 | Power User | Specify pattern name directly in command | I can create keybindings for specific patterns |
+| US-14 | User | Process linked content without navigating | I can quickly summarize/analyze referenced files or sections |
 
 ---
 

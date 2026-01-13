@@ -19,6 +19,7 @@ This document provides guidelines for AI coding agents (Claude, Cursor, Copilot,
 11. **Offer commits at milestones** - After completing a milestone implementation, ask user if they want to commit before proceeding
 12. **Document key decisions** - When making implementation choices (caching strategy, error handling, etc.), add them to the "Milestone X Decisions" table in PLAN_v1.md
 13. **Document testing as you go** - When implementing features, add corresponding test cases to `TESTING.md`. Write tests BEFORE or DURING implementation, not after.
+14. **Sync PRD and PLAN future features** - When adding future feature ideas: add to PRD first (what/why in 2-4 bullets), then PLAN (how: implementation checklist). Keep feature names and order consistent between documents. Phase/priority planning happens separately.
 
 ---
 
@@ -37,11 +38,17 @@ This document provides guidelines for AI coding agents (Claude, Cursor, Copilot,
 
 | Document | Purpose |
 |----------|---------|
-| `PRD_v1.md` | Product requirements, milestones, features |
-| `PLAN_v1.md` | Step-by-step implementation checklist |
+| `PRD_v1.md` | **What** to build: product requirements, milestones, feature descriptions |
+| `PLAN_v1.md` | **How** to build: step-by-step implementation checklists, technical details |
 | `IDEA.md` | Original idea and problem statement |
 | `README.md` | User-facing documentation |
 | `TESTING.md` | Manual testing procedures and test cases |
+
+**PRD vs PLAN relationship:**
+- PRD defines features (what & why) - 2-4 bullet points per feature
+- PLAN defines implementation (how) - detailed task checklists per feature
+- Feature names and order must match between documents
+- When adding new features: PRD first, then PLAN
 
 ---
 
@@ -347,3 +354,4 @@ If unclear about implementation:
 | 1.0 | 2026-01-12 | Initial guidelines |
 | 1.1 | 2026-01-12 | Added rules 10-12 (checkpoints, commits, decisions); Added Fabric CLI Reference |
 | 1.2 | 2026-01-12 | Added rule 13 (document testing); Added TESTING.md to Key Documents |
+| 1.3 | 2026-01-13 | Added rule 14 (sync PRD/PLAN future features); Clarified PRD vs PLAN relationship in Key Documents |
