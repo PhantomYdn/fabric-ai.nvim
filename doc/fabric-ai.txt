@@ -2,7 +2,7 @@
 
 Author:   PhantomYdn
 License:  MIT
-Version:  1.0.0
+Version:  1.1.0
 
 ==============================================================================
 CONTENTS                                                 *fabric-ai-contents*
@@ -86,9 +86,24 @@ Run `:Fabric health` to trigger loading and verify your setup.
 4. COMMANDS                                              *fabric-ai-commands*
 
                                                                     *:Fabric*
-:Fabric                     Process visual selection with a Fabric pattern.
+:Fabric                     Process text with a Fabric pattern. Supports three
+                            input modes:
+
+                            1. Visual selection: Select text first, then run
+                               `:Fabric` (or `:'<,'>Fabric`)
+                            2. Range selection: `:%Fabric` (whole file),
+                               `:10,20Fabric` (lines 10-20)
+                            3. Direct prompt: Run `:Fabric` without selection
+                               to enter a prompt directly
+
                             Opens pattern picker, then streams output to a
                             floating window.
+
+:[range]Fabric              Process the specified line range with a pattern.
+                            Examples:
+                            - `:%Fabric` - entire file
+                            - `:10,20Fabric` - lines 10-20
+                            - `:.Fabric` - current line
 
 :Fabric run                 Same as `:Fabric`. Explicitly invokes the run
                             subcommand.
@@ -209,8 +224,13 @@ These keybindings are active in the output window:
     `<Esc>`       Quit            Same as `q`
     `<C-c>`       Quit            Same as `q`
 
+Note: The Replace (`r`) action is only available when there's a selection or
+range to replace. When using direct prompt mode (`:Fabric` without selection),
+the footer will show `[y]ank [n]ew buffer [q]uit` without the replace option.
+
 During processing, `q`, `<Esc>`, and `<C-c>` will cancel the operation and
-close the window.
+close the window. The footer shows "Processing... [q]uit to cancel" during
+this phase.
 
                                                      *fabric-ai-window-actions*
 Action Details~
@@ -240,12 +260,25 @@ Quit (`q`, `<Esc>`, `<C-c>`)~
                                                     *fabric-ai-usage-text*
 Text Processing~
 
-Basic workflow:
+Visual selection workflow:~
 1. Select text in visual mode (`v`, `V`, or `<C-v>`)
 2. Run `:Fabric`
 3. Pick a pattern from the fuzzy finder
 4. View streaming output in floating window
 5. Choose an action: `r` (replace), `y` (yank), `n` (new buffer), `q` (quit)
+
+Range selection workflow:~
+1. Run `:%Fabric` (whole file) or `:10,20Fabric` (specific lines)
+2. Pick a pattern
+3. View output
+4. Choose an action
+
+Direct prompt workflow:~
+1. Run `:Fabric` without any selection
+2. Enter your prompt in the "Ask Fabric:" input field
+3. Pick a pattern
+4. View output
+5. Choose an action (`y`, `n`, or `q` - replace not available)
 
                                                      *fabric-ai-usage-url*
 URL Processing~
@@ -384,11 +417,16 @@ Solutions:
 3. Check network connection for URL processing
 
                                        *fabric-ai-troubleshooting-selection*
-"No visual selection found"~
+No selection or prompt~
 
-The `:Fabric` command was run without selecting text first.
+When running `:Fabric` without a selection, you'll be prompted to enter text
+directly ("Ask Fabric:"). If you cancel this prompt or enter empty text, no
+action is taken.
 
-Solution: Select text with `v`, `V`, or `<C-v>` before running `:Fabric`
+To process text from your buffer:
+- Visual selection: Select with `v`, `V`, or `<C-v>` then `:Fabric`
+- Range selection: `:%Fabric` for whole file, `:10,20Fabric` for lines 10-20
+- Direct prompt: Run `:Fabric` and type your prompt
 
                                              *fabric-ai-troubleshooting-url*
 "No URL found under cursor"~

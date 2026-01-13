@@ -39,61 +39,111 @@ local function setup_processing_keymaps(buf_id)
   vim.keymap.set("n", "<C-c>", cancel_and_close, vim.tbl_extend("force", keymap_opts, { desc = "Cancel and close" }))
 end
 
----Run the main Fabric workflow: capture selection -> pick pattern -> execute -> display
----This is the handler for `:Fabric` and `:Fabric run`
----@param opts table Command options from nvim_create_user_command
-function M.run(opts)
-  -- Step 1: Capture visual selection (if in visual mode)
-  local input_text, err = selection.get_visual_text()
+---Prompt user for input text when no selection/range is provided
+---@param callback fun(text: string?) Called with input text, or nil if cancelled
+function M._prompt_for_input(callback)
+  vim.ui.input({ prompt = "Ask Fabric: " }, function(input)
+    if input and input ~= "" then
+      callback(input)
+    else
+      callback(nil)
+    end
+  end)
+end
 
-  if not input_text then
-    vim.notify("fabric-ai: " .. (err or "No text selected"), vim.log.levels.WARN)
-    vim.notify("fabric-ai: Select text in visual mode, then run :Fabric", vim.log.levels.INFO)
+---Execute the Fabric workflow with given input text
+---@param input_text string The text to process
+---@param pattern string The pattern to run
+local function execute_fabric(input_text, pattern)
+  -- Open floating window
+  local win_result, win_err = window.open { pattern_name = pattern }
+  if not win_result then
+    vim.notify("fabric-ai: " .. (win_err or "Failed to open window"), vim.log.levels.ERROR)
     return
   end
 
-  -- Step 2: Open pattern picker
+  -- Set up cancel keymaps during processing
+  setup_processing_keymaps(win_result.buf_id)
+
+  -- Execute with streaming
+  processor.run_pattern(pattern, input_text, {
+    on_stdout = function(data)
+      -- Stream output to window as it arrives
+      window.append_text(data)
+    end,
+
+    on_stderr = function(data)
+      -- Show stderr in the window as well (errors from Fabric)
+      window.append_text(data)
+    end,
+
+    on_complete = function(code)
+      window.processing_complete()
+
+      if code ~= 0 then
+        -- Append error indicator (the actual error should already be displayed via stderr)
+        window.append_text("\n\n[Process exited with code " .. code .. "]")
+      end
+
+      -- Set up action keybindings now that processing is complete
+      M._setup_window_keymaps()
+    end,
+  })
+end
+
+---Run the main Fabric workflow with input text and pattern picker
+---@param input_text string The text to process
+local function run_with_input(input_text)
   picker.pick_pattern(function(pattern)
     if not pattern then
-      -- User cancelled picker
+      -- User cancelled picker, clear any stored range
+      selection.clear_range()
       return
     end
 
-    -- Step 3: Open floating window
-    local win_result, win_err = window.open { pattern_name = pattern }
-    if not win_result then
-      vim.notify("fabric-ai: " .. (win_err or "Failed to open window"), vim.log.levels.ERROR)
-      return
-    end
-
-    -- Step 3.5: Set up cancel keymaps during processing
-    setup_processing_keymaps(win_result.buf_id)
-
-    -- Step 4: Execute with streaming
-    processor.run_pattern(pattern, input_text, {
-      on_stdout = function(data)
-        -- Stream output to window as it arrives
-        window.append_text(data)
-      end,
-
-      on_stderr = function(data)
-        -- Show stderr in the window as well (errors from Fabric)
-        window.append_text(data)
-      end,
-
-      on_complete = function(code)
-        window.processing_complete()
-
-        if code ~= 0 then
-          -- Append error indicator (the actual error should already be displayed via stderr)
-          window.append_text("\n\n[Process exited with code " .. code .. "]")
-        end
-
-        -- Set up action keybindings now that processing is complete
-        M._setup_window_keymaps()
-      end,
-    })
+    execute_fabric(input_text, pattern)
   end)
+end
+
+---Run the main Fabric workflow: capture selection -> pick pattern -> execute -> display
+---This is the handler for `:Fabric` and `:Fabric run`
+---
+---Supports three input modes:
+---1. Visual selection: Select text, then `:Fabric` or `:'<,'>Fabric`
+---2. Range selection: `:%Fabric` (whole file), `:5,10Fabric` (lines 5-10)
+---3. Prompt input: `:Fabric` without selection shows input prompt
+---
+---@param opts table Command options from nvim_create_user_command
+function M.run(opts)
+  local input_text, err
+
+  if opts.range == 0 then
+    -- Case 1: No range provided -> show input prompt
+    -- Clear any stale selection range (fixes bug where old visual marks were used)
+    selection.clear_range()
+
+    M._prompt_for_input(function(text)
+      if not text then
+        -- User cancelled or empty input
+        return
+      end
+
+      -- No selection range stored = replace action won't be available
+      run_with_input(text)
+    end)
+    return
+  end
+
+  -- Case 2 & 3: Range provided (visual selection or explicit range like :%Fabric)
+  -- Use opts.line1 and opts.line2 which work for both cases
+  input_text, err = selection.get_range_text(opts.line1, opts.line2)
+
+  if not input_text then
+    vim.notify("fabric-ai: " .. (err or "Failed to get text"), vim.log.levels.WARN)
+    return
+  end
+
+  run_with_input(input_text)
 end
 
 ---Set up keybindings in the output window for actions
@@ -105,6 +155,10 @@ function M._setup_window_keymaps()
   end
 
   local keymap_opts = { buffer = buf_id, noremap = true, silent = true }
+  local has_range = selection.has_range()
+
+  -- Update window footer to reflect available actions
+  window.update_footer(has_range)
 
   -- Close window (q)
   vim.keymap.set("n", "q", function()
@@ -124,17 +178,19 @@ function M._setup_window_keymaps()
     selection.clear_range()
   end, vim.tbl_extend("force", keymap_opts, { desc = "Close window" }))
 
-  -- Replace selection (r) - Milestone 4 implementation
-  vim.keymap.set("n", "r", function()
-    M._action_replace()
-  end, vim.tbl_extend("force", keymap_opts, { desc = "Replace selection with output" }))
+  -- Replace selection (r) - only available if there's a selection to replace
+  if has_range then
+    vim.keymap.set("n", "r", function()
+      M._action_replace()
+    end, vim.tbl_extend("force", keymap_opts, { desc = "Replace selection with output" }))
+  end
 
-  -- Yank to clipboard (y) - Milestone 4 implementation
+  -- Yank to clipboard (y)
   vim.keymap.set("n", "y", function()
     M._action_yank()
   end, vim.tbl_extend("force", keymap_opts, { desc = "Yank output to clipboard" }))
 
-  -- New buffer (n) - Milestone 4 implementation
+  -- New buffer (n)
   vim.keymap.set("n", "n", function()
     M._action_new_buffer()
   end, vim.tbl_extend("force", keymap_opts, { desc = "Open output in new buffer" }))

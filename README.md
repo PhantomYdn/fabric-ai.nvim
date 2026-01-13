@@ -2,7 +2,7 @@
 
 A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fabric)'s 220+ text processing patterns directly into your editor.
 
-> **Version 1.0.0** - MVP Complete
+> **Version 1.1.0** - Enhanced Input Modes
 
 ## Features
 
@@ -50,6 +50,7 @@ A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fa
     },
   },
   keys = {
+    -- fabric-ai.nvim doesn't have default keymappings
     { "<leader>fa", ":'<,'>Fabric<CR>", mode = "v", desc = "Fabric AI" },
     { "<leader>fu", ":Fabric url<CR>", mode = "n", desc = "Fabric URL" },
   },
@@ -77,15 +78,40 @@ When using `cmd = { "Fabric" }`, the plugin loads on first command invocation. R
 
 ### Text Processing
 
+The plugin supports three input modes:
+
+#### 1. Visual Selection
+
 1. Select text in visual mode (`v`, `V`, or `<C-v>`)
 2. Run `:Fabric`
 3. Pick a pattern from the fuzzy finder
 4. View streaming output in floating window
-5. Choose an action:
+5. Choose an action
+
+#### 2. Range Selection
+
+Process specific lines without visual selection:
+
+- `:%Fabric` - Process entire file
+- `:10,20Fabric` - Process lines 10-20
+- `:.Fabric` - Process current line
+
+#### 3. Direct Prompt
+
+Run `:Fabric` without any selection to enter a prompt directly:
+
+1. Run `:Fabric` (with no selection)
+2. Enter your prompt in the input field ("Ask Fabric: ")
+3. Pick a pattern
+4. View output
+
+**Note:** Replace action (`r`) is not available in prompt mode since there's nothing to replace.
+
+### Output Actions
 
 | Key | Action | Description |
 |-----|--------|-------------|
-| `r` | Replace | Replace original selection with output |
+| `r` | Replace | Replace original selection with output (not available in prompt mode) |
 | `y` | Yank | Copy output to system clipboard |
 | `n` | New Buffer | Open output in new markdown buffer |
 | `q` | Quit | Close window, discard output |
@@ -113,7 +139,10 @@ While Fabric is processing, you can cancel at any time by pressing `q`, `<Esc>`,
 
 | Command | Description |
 |---------|-------------|
-| `:Fabric` | Process visual selection with pattern picker |
+| `:Fabric` | Process visual selection, or prompt for input if no selection |
+| `:'<,'>Fabric` | Process visual selection (explicit range) |
+| `:%Fabric` | Process entire file |
+| `:10,20Fabric` | Process lines 10-20 |
 | `:Fabric run` | Same as `:Fabric` |
 | `:Fabric url` | Process URL under cursor |
 | `:Fabric health` | Run health check (`:checkhealth fabric-ai`) |

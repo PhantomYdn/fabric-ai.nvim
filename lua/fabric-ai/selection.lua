@@ -33,6 +33,45 @@ function M.get_visual_text()
   return table.concat(lines, "\n"), nil
 end
 
+---Get text from an explicit line range (for :%Fabric, :5,10Fabric, etc.)
+---This is used when a command is invoked with a range, not visual selection.
+---@param line1 number Start line (1-indexed)
+---@param line2 number End line (1-indexed)
+---@param bufnr? number Buffer number (defaults to current)
+---@return string? text The text from the range
+---@return string? error Error message if failed
+function M.get_range_text(line1, line2, bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  -- Validate line numbers
+  local line_count = vim.api.nvim_buf_line_count(bufnr)
+  if line1 < 1 or line2 < 1 or line1 > line_count or line2 > line_count then
+    return nil, "Invalid line range"
+  end
+
+  -- Normalize order
+  if line1 > line2 then
+    line1, line2 = line2, line1
+  end
+
+  -- Get lines (0-indexed for nvim_buf_get_lines)
+  local lines = vim.api.nvim_buf_get_lines(bufnr, line1 - 1, line2, false)
+
+  -- Store range for potential replacement (always line-wise for explicit ranges)
+  ---@type FabricAI.SelectionRange
+  local range = {
+    start_row = line1,
+    start_col = 1,
+    end_row = line2,
+    end_col = #(lines[#lines] or ""),
+    mode = "V", -- Line-wise mode for explicit ranges
+    bufnr = bufnr,
+  }
+  M._last_range = range
+
+  return table.concat(lines, "\n"), nil
+end
+
 ---Get the visual selection range (positions)
 ---Stores the range for later use (e.g., replacement)
 ---@return FabricAI.SelectionRange? range

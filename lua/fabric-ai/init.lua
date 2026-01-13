@@ -9,7 +9,7 @@
 ---@field commands FabricAI.Commands
 local M = {}
 
-M._VERSION = "0.1.0"
+M._VERSION = "1.1.0"
 
 ---@type boolean
 local _setup_done = false

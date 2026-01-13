@@ -169,17 +169,105 @@ Line 4: Final line
 
 ---
 
-### Test 9: Empty Selection Handling
+### Test 9: Direct Prompt Input (No Selection)
 
 **Steps:**
 1. Without selecting any text, run `:Fabric`
 
 **Expected:**
-- Warning message: "No visual selection found" (yellow, not red)
-- Hint: "Select text in visual mode, then run :Fabric"
-- No Lua error thrown
+- Input prompt appears: "Ask Fabric: "
+- Enter some text (e.g., "What is the capital of France?")
+- Pattern picker opens
+- After selecting pattern, processing begins
+- Footer shows `[y]ank [n]ew buffer [q]uit` (NO replace option)
 
-**Pass Criteria:** Graceful error handling, no stack trace
+**Pass Criteria:** Prompt mode works, replace action correctly hidden
+
+---
+
+### Test 9b: Cancel Prompt Input
+
+**Steps:**
+1. Without selecting any text, run `:Fabric`
+2. When prompt appears, press `<Esc>` or leave empty and press Enter
+
+**Expected:**
+- No action taken
+- No error messages
+- Returns to normal mode
+
+**Pass Criteria:** Graceful cancellation of prompt input
+
+---
+
+### Test 9c: Range Selection - Entire File
+
+**Steps:**
+1. Open a test file with multiple lines
+2. Run `:%Fabric`
+3. Select a pattern
+
+**Expected:**
+- Entire file content is processed
+- Output appears in floating window
+- Footer shows `[r]eplace [y]ank [n]ew buffer [q]uit`
+- Pressing `r` replaces entire file content
+
+**Pass Criteria:** `:%Fabric` processes whole file
+
+---
+
+### Test 9d: Range Selection - Specific Lines
+
+**Steps:**
+1. Open a test file with at least 4 lines
+2. Run `:2,3Fabric` (process lines 2-3)
+3. Select a pattern
+4. Wait for completion
+5. Press `r`
+
+**Expected:**
+- Only lines 2-3 are processed
+- Only lines 2-3 are replaced
+- Lines 1 and 4+ remain unchanged
+
+**Pass Criteria:** Line range selection works correctly
+
+---
+
+### Test 9e: Stale Visual Selection Bug (REGRESSION TEST)
+
+**Purpose:** Verify fix for bug where `:Fabric` in normal mode used stale visual marks
+
+**Steps:**
+1. Select some text in visual mode (`V` or `v`)
+2. Run `:Fabric`, select pattern, press `q` to close
+3. Move cursor to a completely different location
+4. Exit visual mode (ensure you're in normal mode)
+5. Run `:Fabric` without any selection
+
+**Expected:**
+- Input prompt appears: "Ask Fabric: "
+- Does NOT use the previous visual selection
+- Previous visual marks are NOT processed
+
+**Pass Criteria:** `:Fabric` in normal mode shows prompt, not stale selection
+
+---
+
+### Test 9f: Empty Buffer with Range
+
+**Steps:**
+1. Open an empty buffer (`:enew`)
+2. Run `:%Fabric`
+3. Select a pattern (e.g., one that generates content)
+
+**Expected:**
+- Empty string is processed (valid input for generative patterns)
+- No error about empty content
+- Output appears in window
+
+**Pass Criteria:** Empty buffer range handled gracefully
 
 ---
 
@@ -202,13 +290,30 @@ Line 4: Final line
 ### Test 11: Window Footer Visibility
 
 **Steps:**
-1. Run any `:Fabric` command
+1. Select text and run `:Fabric`
 
-**Verify:**
+**Verify during processing:**
 - Window border shows title: " Fabric AI: {pattern_name} "
-- Window border shows footer: " [r]eplace [y]ank [n]ew buffer [q]uit "
+- Window border shows footer: " Processing... [q]uit to cancel "
 
-**Pass Criteria:** Both title and footer visible
+**Verify after processing completes:**
+- Footer updates to: " [r]eplace [y]ank [n]ew buffer [q]uit "
+
+**Pass Criteria:** Footer shows processing state, then action keys
+
+---
+
+### Test 11b: Window Footer Without Replace Option
+
+**Steps:**
+1. Without selection, run `:Fabric`
+2. Enter a prompt and select a pattern
+
+**Verify after processing completes:**
+- Footer shows: " [y]ank [n]ew buffer [q]uit "
+- No `[r]eplace` option visible
+
+**Pass Criteria:** Replace option hidden when no selection to replace
 
 ---
 
@@ -617,15 +722,20 @@ For rapid verification after changes, run these in order:
 2. `V` line 3 -> `:Fabric` -> select pattern -> `n` -> verify new buffer
 3. `V` line 4 -> `:Fabric` -> select pattern -> `r` -> verify replacement
 4. `v` select partial -> `:Fabric` -> `q` -> verify window closes
-5. No selection -> `:Fabric` -> verify warning (no error)
+
+**Input Modes:**
+5. No selection -> `:Fabric` -> verify prompt appears (NOT stale selection)
+6. Enter prompt -> select pattern -> verify footer has no `[r]eplace`
+7. `:%Fabric` -> select pattern -> `r` -> verify entire file replaced
+8. `:2,3Fabric` -> select pattern -> `r` -> verify only lines 2-3 replaced
 
 **URL Processing:**
-6. Cursor on https://example.com -> `:Fabric url` -> select pattern -> `q`
-7. Cursor on YouTube URL -> `:Fabric url` -> verify pattern picker opens
+9. Cursor on https://example.com -> `:Fabric url` -> select pattern -> `q`
+10. Cursor on YouTube URL -> `:Fabric url` -> verify pattern picker opens
 
 **Documentation & Health:**
-8. `:Fabric health` -> verify health check runs
-9. `:help fabric-ai` -> verify help loads
+11. `:Fabric health` -> verify health check runs
+12. `:help fabric-ai` -> verify help loads
 
 ---
 
@@ -647,3 +757,4 @@ When implementing new features:
 | 1.0 | 2026-01-12 | Initial testing guide for Milestone 4 |
 | 1.1 | 2026-01-12 | Added Milestone 5 URL processing tests |
 | 1.2 | 2026-01-12 | Added Milestone 6 polish tests (Tests 23-29) |
+| 1.3 | 2026-01-12 | Added input mode tests (9b-9f, 11b), stale selection regression test |

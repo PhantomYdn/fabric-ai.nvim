@@ -80,6 +80,7 @@ function M.open(opts)
   vim.bo[buf_id].filetype = "markdown"
 
   -- Create window
+  -- Footer shows processing indicator initially; will be updated when processing completes
   local win_id = vim.api.nvim_open_win(buf_id, true, {
     relative = "editor",
     width = dims.width,
@@ -90,7 +91,7 @@ function M.open(opts)
     border = win_config.border,
     title = make_title(opts.pattern_name),
     title_pos = "center",
-    footer = " [r]eplace [y]ank [n]ew buffer [q]uit ",
+    footer = " Processing... [q]uit to cancel ",
     footer_pos = "center",
   })
 
@@ -275,6 +276,30 @@ function M.set_title(title)
   vim.api.nvim_win_set_config(M._state.win_id, {
     title = " " .. title .. " ",
     title_pos = "center",
+  })
+end
+
+---Get the footer text based on available actions
+---@param replace_available boolean Whether replace action is available
+---@return string
+local function get_footer_text(replace_available)
+  if replace_available then
+    return " [r]eplace [y]ank [n]ew buffer [q]uit "
+  else
+    return " [y]ank [n]ew buffer [q]uit "
+  end
+end
+
+---Update the window footer based on available actions
+---@param replace_available boolean Whether replace action is available
+function M.update_footer(replace_available)
+  if not M.is_open() then
+    return
+  end
+
+  vim.api.nvim_win_set_config(M._state.win_id, {
+    footer = get_footer_text(replace_available),
+    footer_pos = "center",
   })
 end
 

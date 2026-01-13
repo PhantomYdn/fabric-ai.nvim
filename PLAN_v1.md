@@ -181,15 +181,18 @@ Use this for tracking progress during development.
 |----------|--------|-----------|
 | Selection capture module | Separate `selection.lua` | Single responsibility, reusable for URL processing |
 | Streaming display | Show data as-is (word by word) | Real-time feedback per user preference |
-| No selection handling | Error + abort | MVP simplicity; document future ideas (prompt for input) |
+| No selection handling | ~~Error + abort~~ **Prompt for input** | ~~MVP simplicity~~ **REVISED (2026-01-12):** Now shows "Ask Fabric:" input prompt via `vim.ui.input()`. Also supports range selection (`:%Fabric`, `:10,20Fabric`). |
 | Error display | Show in window | Consistent UX, all output in one place |
 | Actions implementation | In commands.lua | Integrated with command flow, simpler architecture |
+| Input mode detection | Use `opts.range` from command | Reliable detection: `0` = no range (prompt), `>0` = use `line1/line2` |
+| Replace action visibility | Conditional based on `has_range()` | Hide `[r]eplace` when no selection to replace (prompt mode) |
 
 ### Future Enhancement Ideas (Milestone 3)
-- Prompt for input when no visual selection (`vim.ui.input`)
-- Use current buffer content as input
-- Use current line as input
+- ~~Prompt for input when no visual selection (`vim.ui.input`)~~ **DONE (2026-01-12)**
+- ~~Use current buffer content as input~~ **DONE via `:%Fabric`**
+- ~~Use current line as input~~ **DONE via `:.Fabric`**
 - Use word under cursor as input
+- Multi-line prompt input (floating window instead of `vim.ui.input`)
 
 ---
 
@@ -378,29 +381,39 @@ Use this for tracking progress during development.
 
 ### Future Phase Items (Document for Later)
 
-**Phase 2: Enhanced Picker Support**
+**Phase 2: Enhanced Input Modes**
+- [ ] Motion/operator support (e.g., `<leader>f5j` for next 5 lines, `<leader>fap` for paragraph)
+  - Implementation: `vim.go.operatorfunc` with user-configured keybinding
+  - Uses `'[` and `']` marks to get motion range
+  - Power-user feature, requires keybinding configuration
+- [ ] Multi-line prompt input (floating window instead of `vim.ui.input`)
+  - Current: `vim.ui.input()` is single-line only
+  - Future: Small floating window for multi-line prompt entry
+  - Use case: Complex questions or pasting content directly
+
+**Phase 3: Enhanced Picker Support**
 - [ ] Snacks.nvim picker integration
 - [ ] fzf-lua picker integration
 - [ ] Auto-detect Fabric CLI (`fabric-ai` vs `fabric`)
 
-**Phase 3: Pattern Management**
+**Phase 4: Pattern Management**
 - [ ] Pattern favorites system
 - [ ] Recent patterns history
 - [ ] Quick-repeat last pattern
 
-**Phase 4: Advanced Features**
+**Phase 5: Advanced Features**
 - [ ] Model selection UI
 - [ ] Editable output window
 - [ ] Multiple concurrent sessions
 - [ ] Fabric context integration
 
-**Phase 5: Developer Experience**
+**Phase 6: Developer Experience**
 - [ ] GitHub Actions CI/CD
 - [ ] Automated tests (busted)
 - [ ] LuaCov coverage
 - [ ] Auto-release to luarocks
 
-**Phase 6: Integrations**
+**Phase 7: Integrations**
 - [ ] Lualine status component
 - [ ] Which-key integration
 - [ ] Mini.nvim support
