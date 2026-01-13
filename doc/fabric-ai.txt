@@ -116,8 +116,8 @@ Call the setup function to configure the plugin:
       -- Default: ~/.config/fabric/patterns/
       patterns_path = nil,
 
-      -- Command timeout in milliseconds (default: 2 minutes)
-      timeout = 120000,
+      -- Command timeout in milliseconds (default: 5 minutes)
+      timeout = 300000,
 
       -- Floating window settings
       window = {
@@ -151,7 +151,7 @@ patterns_path~
 
 timeout~
     Type: `number`
-    Default: `120000` (2 minutes)
+    Default: `300000` (5 minutes)
 
     Command timeout in milliseconds. Long-running patterns (like YouTube
     transcript processing) may need higher values. Set to 0 for no timeout
@@ -182,7 +182,7 @@ Configuration Validation~
 The plugin validates configuration on setup. Invalid values trigger a warning
 via |vim.notify()| and fall back to defaults. Examples:
 
-- `timeout = -100` warns and uses `120000`
+- `timeout = -100` warns and uses `300000`
 - `window.width = 2.0` warns and uses `0.8`
 - `fabric_path = 123` warns and uses `"fabric-ai"`
 

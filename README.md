@@ -42,7 +42,7 @@ A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fa
     -- Default configuration (all optional)
     fabric_path = "fabric-ai",     -- Path to Fabric CLI
     patterns_path = nil,           -- Custom patterns dir (auto-detect if nil)
-    timeout = 120000,              -- Command timeout in ms (2 minutes)
+    timeout = 300000,              -- Command timeout in ms (5 minutes)
     window = {
       width = 0.8,                 -- 80% of editor width
       height = 0.8,                -- 80% of editor height
@@ -188,8 +188,8 @@ require("fabric-ai").setup({
   -- Custom patterns directory (nil = auto-detect ~/.config/fabric/patterns)
   patterns_path = nil,
   
-  -- Command timeout in milliseconds
-  timeout = 120000,
+  -- Command timeout in milliseconds (5 minutes)
+  timeout = 300000,
   
   -- Floating window settings
   window = {
@@ -211,7 +211,7 @@ Valid border styles: `"none"`, `"single"`, `"double"`, `"rounded"`, `"solid"`, `
 
 The plugin validates your configuration on setup. Invalid values trigger a warning via `vim.notify()` and fall back to sensible defaults. For example:
 
-- `timeout = -100` warns and uses `120000`
+- `timeout = -100` warns and uses `300000`
 - `window.width = 2.0` warns and uses `0.8`
 
 ### Fabric CLI Check

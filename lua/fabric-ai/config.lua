@@ -31,7 +31,7 @@ local DEFAULT_CONFIG = {
     height = 0.8,
     border = "rounded",
   },
-  timeout = 120000,
+  timeout = 300000,
   default_action = "window",
 }
 
