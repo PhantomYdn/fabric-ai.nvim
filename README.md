@@ -2,7 +2,8 @@
 
 A Neovim plugin that integrates [Fabric AI](https://github.com/danielmiessler/fabric)'s 220+ text processing patterns directly into your editor.
 
-> **Version 1.1.0** - Enhanced Input Modes
+<img width="2460" height="1902" alt="image" src="https://github.com/user-attachments/assets/51dfb3f3-6e3c-474c-99ba-30a2c059b908" />
+
 
 ## Features
 
